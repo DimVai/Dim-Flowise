@@ -9,14 +9,11 @@ import { DataSource } from 'typeorm'
 import { AbortControllerPool } from './AbortControllerPool'
 import { CachePool } from './CachePool'
 import { requireCommunityAuth } from './community-auth/middleware'
-import { validateCommunityAuthConfiguration } from './community-auth/service'
+import { createCommunityUser, validateCommunityAuthConfiguration } from './community-auth/service'
 import { CommunityAuthUser } from './community-auth/types'
 import { ChatFlow } from './database/entities/ChatFlow'
 import { getDataSource } from './DataSource'
-import { Organization } from './enterprise/database/entities/organization.entity'
-import { Workspace } from './enterprise/database/entities/workspace.entity'
-import { IdentityManager } from './IdentityManager'
-import { MODE, Platform } from './Interface'
+import { MODE } from './Interface'
 import { IMetricsProvider } from './Interface.Metrics'
 import { OpenTelemetry } from './metrics/OpenTelemetry'
 import { Prometheus } from './metrics/Prometheus'
@@ -69,7 +66,6 @@ export class App {
     rateLimiterManager: RateLimiterManager
     AppDataSource: DataSource = getDataSource()
     sseStreamer: SSEStreamer
-    identityManager: IdentityManager
     metricsProvider: IMetricsProvider
     queueManager: QueueManager
     redisSubscriber: RedisEventSubscriber
@@ -89,10 +85,6 @@ export class App {
             // Run Migrations Scripts
             await this.AppDataSource.runMigrations({ transaction: 'each' })
             logger.info('🔄 [server]: Database migrations completed successfully')
-
-            // Initialize Identity Manager
-            this.identityManager = await IdentityManager.getInstance()
-            logger.info('🔐 [server]: Identity Manager initialized successfully')
 
             // Initialize nodes pool
             this.nodesPool = new NodesPool()
@@ -141,7 +133,6 @@ export class App {
                     appDataSource: this.AppDataSource,
                     abortControllerPool: this.abortControllerPool,
                     usageCacheManager: this.usageCacheManager,
-                    identityManager: this.identityManager,
                     serverAdapter
                 })
                 logger.info('✅ [Queue]: All queues setup successfully')
@@ -245,50 +236,15 @@ export class App {
                             return res.status(401).json({ error: 'Unauthorized Access' })
                         }
 
-                        // Only check license validity for non-open-source platforms
-                        if (this.identityManager.getPlatformType() !== Platform.OPEN_SOURCE) {
-                            if (!this.identityManager.isLicenseValid()) {
-                                return res.status(401).json({ error: 'Unauthorized Access' })
-                            }
-                        }
-
                         const { isValid, apiKey } = await validateAPIKey(req)
                         if (!isValid || !apiKey) {
                             return res.status(401).json({ error: 'Unauthorized Access' })
                         }
 
-                        // Find workspace
-                        const workspace = await this.AppDataSource.getRepository(Workspace).findOne({
-                            where: { id: apiKey.workspaceId }
-                        })
-                        if (!workspace) {
-                            return res.status(401).json({ error: 'Unauthorized Access' })
-                        }
-
-                        // Find organization
-                        const activeOrganizationId = workspace.organizationId as string
-                        const org = await this.AppDataSource.getRepository(Organization).findOne({
-                            where: { id: activeOrganizationId }
-                        })
-                        if (!org) {
-                            return res.status(401).json({ error: 'Unauthorized Access' })
-                        }
-                        const subscriptionId = org.subscriptionId as string
-                        const customerId = org.customerId as string
-                        const features = await this.identityManager.getFeaturesByPlan(subscriptionId)
-                        const productId = await this.identityManager.getProductIdFromSubscription(subscriptionId)
-                        // @ts-ignore
-                        req.user = {
-                            permissions: apiKey.permissions,
-                            features,
-                            activeOrganizationId: activeOrganizationId,
-                            activeOrganizationSubscriptionId: subscriptionId,
-                            activeOrganizationCustomerId: customerId,
-                            activeOrganizationProductId: productId,
-                            isOrganizationAdmin: false,
-                            activeWorkspaceId: workspace.id,
-                            activeWorkspace: workspace.name
-                        }
+                        const apiKeyUser = createCommunityUser()
+                        apiKeyUser.permissions = apiKey.permissions
+                        apiKeyUser.isOrganizationAdmin = false
+                        req.user = apiKeyUser
                         next()
                     }
                 } else {
@@ -334,7 +290,7 @@ export class App {
             })
         })
 
-        if (process.env.MODE === MODE.QUEUE && process.env.ENABLE_BULLMQ_DASHBOARD === 'true' && !this.identityManager.isCloud()) {
+        if (process.env.MODE === MODE.QUEUE && process.env.ENABLE_BULLMQ_DASHBOARD === 'true') {
             // Initialize admin queues rate limiter
             const id = 'bullmq_admin_dashboard'
             await this.rateLimiterManager.addRateLimiter(

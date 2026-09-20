@@ -18,9 +18,8 @@ import { ICommonObject, INodeData } from 'flowise-components'
 import { convertToOpenAIFunction } from '@langchain/core/utils/function_calling'
 import { v4 as uuidv4 } from 'uuid'
 import { Variable } from '../../database/entities/Variable'
-import { getWorkspaceSearchOptions } from '../../enterprise/utils/ControllerServiceUtils'
-import { Workspace } from '../../enterprise/database/entities/workspace.entity'
-import { Organization } from '../../enterprise/database/entities/organization.entity'
+import { getWorkspaceSearchOptions } from '../../community-auth/workspace'
+import { COMMUNITY_ORGANIZATION_ID, COMMUNITY_WORKSPACE_ID } from '../../community-auth/constants'
 
 const SOURCE_DOCUMENTS_PREFIX = '\n\n----FLOWISE_SOURCE_DOCUMENTS----\n\n'
 const ARTIFACTS_PREFIX = '\n\n----FLOWISE_ARTIFACTS----\n\n'
@@ -65,24 +64,9 @@ const buildAndInitTool = async (chatflowid: string, reqWorkspaceId?: string, _ch
     const { nodeOverrides, variableOverrides, apiOverrideStatus } = getAPIOverrideConfig(chatflow)
 
     // This can be public API, so we can only get orgId from the chatflow
-    const chatflowWorkspaceId = chatflow.workspaceId
-    const workspace = await appServer.AppDataSource.getRepository(Workspace).findOneBy({
-        id: chatflowWorkspaceId
-    })
-    if (!workspace) {
-        throw new InternalFlowiseError(StatusCodes.NOT_FOUND, `Workspace ${chatflowWorkspaceId} not found`)
-    }
-    const workspaceId = workspace.id
-
-    const org = await appServer.AppDataSource.getRepository(Organization).findOneBy({
-        id: workspace.organizationId
-    })
-    if (!org) {
-        throw new InternalFlowiseError(StatusCodes.NOT_FOUND, `Organization ${workspace.organizationId} not found`)
-    }
-
-    const orgId = org.id
-    const subscriptionId = org.subscriptionId
+    const workspaceId = chatflow.workspaceId || COMMUNITY_WORKSPACE_ID
+    const orgId = COMMUNITY_ORGANIZATION_ID
+    const subscriptionId = ''
 
     const reactFlowNodes = await buildFlow({
         startingNodeIds,

@@ -3,12 +3,12 @@ import { extractResponseContent, ICommonObject } from 'flowise-components'
 import { StatusCodes } from 'http-status-codes'
 import { cloneDeep, isEqual, uniqWith } from 'lodash'
 import OpenAI from 'openai'
-import { DeleteResult, In, QueryRunner } from 'typeorm'
+import { DeleteResult, QueryRunner } from 'typeorm'
 import { Assistant } from '../../database/entities/Assistant'
 import { Credential } from '../../database/entities/Credential'
 import { DocumentStore } from '../../database/entities/DocumentStore'
-import { Workspace } from '../../enterprise/database/entities/workspace.entity'
-import { getWorkspaceSearchOptions } from '../../enterprise/utils/ControllerServiceUtils'
+import { COMMUNITY_WORKSPACE_ID } from '../../community-auth/constants'
+import { getWorkspaceSearchOptions } from '../../community-auth/workspace'
 import { InternalFlowiseError } from '../../errors/internalFlowiseError'
 import { getErrorMessage } from '../../errors/utils'
 import { AssistantType } from '../../Interface'
@@ -212,15 +212,13 @@ const deleteAssistant = async (assistantId: string, isDeleteBoth: any, workspace
     }
 }
 
-async function getAssistantsCountByOrganization(type: AssistantType, organizationId: string): Promise<number> {
+async function getAssistantsCountByOrganization(type: AssistantType, _organizationId: string): Promise<number> {
     try {
         const appServer = getRunningExpressApp()
 
-        const workspaces = await appServer.AppDataSource.getRepository(Workspace).findBy({ organizationId })
-        const workspaceIds = workspaces.map((workspace) => workspace.id)
         const assistantsCount = await appServer.AppDataSource.getRepository(Assistant).countBy({
             type,
-            workspaceId: In(workspaceIds)
+            workspaceId: COMMUNITY_WORKSPACE_ID
         })
 
         return assistantsCount

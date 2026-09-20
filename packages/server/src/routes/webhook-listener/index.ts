@@ -1,6 +1,6 @@
 import express from 'express'
 import webhookListenerController from '../../controllers/webhook-listener'
-import { checkAnyPermission } from '../../enterprise/rbac/PermissionCheck'
+import { checkAnyPermission } from '../../community-auth/permissions'
 
 const router = express.Router()
 

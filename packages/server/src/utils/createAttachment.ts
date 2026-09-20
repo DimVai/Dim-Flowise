@@ -17,8 +17,7 @@ import logger from './logger'
 import { getErrorMessage } from '../errors/utils'
 import { checkStorage, updateStorageUsage } from './quotaUsage'
 import { ChatFlow } from '../database/entities/ChatFlow'
-import { Workspace } from '../enterprise/database/entities/workspace.entity'
-import { Organization } from '../enterprise/database/entities/organization.entity'
+import { COMMUNITY_ORGANIZATION_ID, COMMUNITY_WORKSPACE_ID } from '../community-auth/constants'
 import { InternalFlowiseError } from '../errors/internalFlowiseError'
 import { StatusCodes } from 'http-status-codes'
 
@@ -53,24 +52,9 @@ export const createFileAttachment = async (req: Request) => {
 
     // This is one of the WHITELIST_URLS, API can be public and there might be no req.user
     if (!orgId || !workspaceId) {
-        const chatflowWorkspaceId = chatflow.workspaceId
-        const workspace = await appServer.AppDataSource.getRepository(Workspace).findOneBy({
-            id: chatflowWorkspaceId
-        })
-        if (!workspace) {
-            throw new InternalFlowiseError(StatusCodes.NOT_FOUND, `Workspace ${chatflowWorkspaceId} not found`)
-        }
-        workspaceId = workspace.id
-
-        const org = await appServer.AppDataSource.getRepository(Organization).findOneBy({
-            id: workspace.organizationId
-        })
-        if (!org) {
-            throw new InternalFlowiseError(StatusCodes.NOT_FOUND, `Organization ${workspace.organizationId} not found`)
-        }
-
-        orgId = org.id
-        subscriptionId = org.subscriptionId as string
+        workspaceId = chatflow.workspaceId || COMMUNITY_WORKSPACE_ID
+        orgId = COMMUNITY_ORGANIZATION_ID
+        subscriptionId = ''
     }
 
     // Parse chatbot configuration to get file upload settings

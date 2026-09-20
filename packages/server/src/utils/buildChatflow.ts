@@ -67,11 +67,10 @@ import { checkPredictions, checkStorage, updatePredictionsUsage, updateStorageUs
 import { buildAgentGraph } from './buildAgentGraph'
 import { getErrorMessage } from '../errors/utils'
 import { FLOWISE_METRIC_COUNTERS, FLOWISE_COUNTER_STATUS, IMetricsProvider } from '../Interface.Metrics'
-import { getWorkspaceSearchOptions } from '../enterprise/utils/ControllerServiceUtils'
+import { getWorkspaceSearchOptions } from '../community-auth/workspace'
 import { OMIT_QUEUE_JOB_DATA } from './constants'
 import { executeAgentFlow } from './buildAgentflow'
-import { Workspace } from '../enterprise/database/entities/workspace.entity'
-import { Organization } from '../enterprise/database/entities/organization.entity'
+import { COMMUNITY_ORGANIZATION_ID, COMMUNITY_WORKSPACE_ID } from '../community-auth/constants'
 
 const shouldAutoPlayTTS = (textToSpeechConfig: string | undefined | null): boolean => {
     if (!textToSpeechConfig) return false
@@ -1035,26 +1034,11 @@ export const utilBuildChatflow = async (req: Request, isInternal: boolean = fals
         }
 
         // This can be public API, so we can only get orgId from the chatflow
-        const chatflowWorkspaceId = chatflow.workspaceId
-        const workspace = await appServer.AppDataSource.getRepository(Workspace).findOneBy({
-            id: chatflowWorkspaceId
-        })
-        if (!workspace) {
-            throw new InternalFlowiseError(StatusCodes.NOT_FOUND, `Workspace ${chatflowWorkspaceId} not found`)
-        }
-        const workspaceId = workspace.id
-
-        const org = await appServer.AppDataSource.getRepository(Organization).findOneBy({
-            id: workspace.organizationId
-        })
-        if (!org) {
-            throw new InternalFlowiseError(StatusCodes.NOT_FOUND, `Organization ${workspace.organizationId} not found`)
-        }
-
-        const orgId = org.id
+        const workspaceId = chatflow.workspaceId || COMMUNITY_WORKSPACE_ID
+        const orgId = COMMUNITY_ORGANIZATION_ID
         organizationId = orgId
-        const subscriptionId = org.subscriptionId as string
-        const productId = await appServer.identityManager.getProductIdFromSubscription(subscriptionId)
+        const subscriptionId = ''
+        const productId = ''
 
         await checkPredictions(orgId, subscriptionId, appServer.usageCacheManager)
 

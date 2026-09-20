@@ -6,7 +6,7 @@ import { StatusCodes } from 'http-status-codes'
 import { InternalFlowiseError } from '../../errors/internalFlowiseError'
 import { getRunningExpressApp } from '../../utils/getRunningExpressApp'
 import { ChatFlow } from '../../database/entities/ChatFlow'
-import { Workspace } from '../../enterprise/database/entities/workspace.entity'
+import { COMMUNITY_ORGANIZATION_ID } from '../../community-auth/constants'
 
 const streamUploadedFile = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -41,14 +41,7 @@ const streamUploadedFile = async (req: Request, res: Response, next: NextFunctio
         if (!chatflow) {
             throw new InternalFlowiseError(StatusCodes.NOT_FOUND, `Chatflow ${chatflowId} not found`)
         }
-        const chatflowWorkspaceId = chatflow.workspaceId
-        const workspace = await appServer.AppDataSource.getRepository(Workspace).findOneBy({
-            id: chatflowWorkspaceId
-        })
-        if (!workspace) {
-            throw new InternalFlowiseError(StatusCodes.NOT_FOUND, `Workspace ${chatflowWorkspaceId} not found`)
-        }
-        const orgId = workspace.organizationId as string
+        const orgId = COMMUNITY_ORGANIZATION_ID
 
         // Set Content-Disposition header - force attachment for download
         if (download) {

@@ -1,8 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { StatusCodes } from 'http-status-codes'
-import { QueryRunner } from 'typeorm'
 import { ChatFlow, EnumChatflowType } from '../../database/entities/ChatFlow'
-import { WorkspaceUserErrorMessage, WorkspaceUserService } from '../../enterprise/services/workspace-user.service'
 import { InternalFlowiseError } from '../../errors/internalFlowiseError'
 import { ChatflowType } from '../../Interface'
 import { ScheduleBeat } from '../../schedule/ScheduleBeat'
@@ -227,7 +225,6 @@ const updateChatflow = async (req: Request, res: Response, next: NextFunction) =
 }
 
 const getSinglePublicChatflow = async (req: Request, res: Response, next: NextFunction) => {
-    let queryRunner: QueryRunner | undefined
     try {
         if (typeof req.params === 'undefined' || !req.params.id) {
             throw new InternalFlowiseError(
@@ -240,19 +237,11 @@ const getSinglePublicChatflow = async (req: Request, res: Response, next: NextFu
         if (chatflow.isPublic)
             return res.status(StatusCodes.OK).json({ ...chatflow, flowData: sanitizeFlowDataForPublicEndpoint(chatflow.flowData) })
         if (!req.user) return res.status(StatusCodes.UNAUTHORIZED).json({ message: GeneralErrorMessage.UNAUTHORIZED })
-        queryRunner = getRunningExpressApp().AppDataSource.createQueryRunner()
-        const workspaceUserService = new WorkspaceUserService()
-        const workspaceUser = await workspaceUserService.readWorkspaceUserByUserId(req.user.id, queryRunner)
-        if (workspaceUser.length === 0)
-            return res.status(StatusCodes.NOT_FOUND).json({ message: WorkspaceUserErrorMessage.WORKSPACE_USER_NOT_FOUND })
-        const workspaceIds = workspaceUser.map((user) => user.workspaceId)
-        if (!workspaceIds.includes(chatflow.workspaceId))
+        if (chatflow.workspaceId !== req.user.activeWorkspaceId)
             return res.status(StatusCodes.BAD_REQUEST).json({ message: 'You are not in the workspace that owns this chatflow' })
         return res.status(StatusCodes.OK).json(chatflow)
     } catch (error) {
         next(error)
-    } finally {
-        if (queryRunner) await queryRunner.release()
     }
 }
 

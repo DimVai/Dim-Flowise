@@ -121,33 +121,6 @@ export abstract class BaseCommand extends Command {
 
         // Auth
         APP_URL: Flags.string(),
-        SMTP_HOST: Flags.string(),
-        SMTP_PORT: Flags.string(),
-        SMTP_USER: Flags.string(),
-        SMTP_PASSWORD: Flags.string(),
-        SMTP_SECURE: Flags.string(),
-        ALLOW_UNAUTHORIZED_CERTS: Flags.string(),
-        SENDER_EMAIL: Flags.string(),
-        JWT_AUTH_TOKEN_SECRET: Flags.string(),
-        JWT_REFRESH_TOKEN_SECRET: Flags.string(),
-        JWT_ISSUER: Flags.string(),
-        JWT_AUDIENCE: Flags.string(),
-        JWT_TOKEN_EXPIRY_IN_MINUTES: Flags.string(),
-        JWT_REFRESH_TOKEN_EXPIRY_IN_MINUTES: Flags.string(),
-        EXPIRE_AUTH_TOKENS_ON_RESTART: Flags.string(),
-        EXPRESS_SESSION_SECRET: Flags.string(),
-        SECURE_COOKIES: Flags.string(),
-        INVITE_TOKEN_EXPIRY_IN_HOURS: Flags.string(),
-        PASSWORD_RESET_TOKEN_EXPIRY_IN_MINS: Flags.string(),
-        PASSWORD_SALT_HASH_ROUNDS: Flags.string(),
-        TOKEN_HASH_SECRET: Flags.string(),
-        WORKSPACE_INVITE_TEMPLATE_PATH: Flags.string(),
-
-        // Enterprise
-        LICENSE_URL: Flags.string(),
-        FLOWISE_EE_LICENSE_KEY: Flags.string(),
-        OFFLINE: Flags.string(),
-
         // Metrics
         POSTHOG_PUBLIC_API_KEY: Flags.string(),
         ENABLE_METRICS: Flags.string(),

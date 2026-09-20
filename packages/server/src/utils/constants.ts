@@ -21,18 +21,6 @@ export const WHITELIST_URLS = [
     '/api/v1/attachments',
     '/api/v1/auth/resolve',
     '/api/v1/auth/login',
-    '/api/v1/auth/refreshToken',
-    '/api/v1/settings',
-    '/api/v1/account/logout',
-    '/api/v1/account/verify',
-    '/api/v1/account/register',
-    '/api/v1/account/resend-verification',
-    '/api/v1/account/forgot-password',
-    '/api/v1/account/reset-password',
-    '/api/v1/account/confirm-email-change',
-    '/api/v1/loginmethod/default',
-    '/api/v1/pricing',
-    '/api/v1/user/test',
     '/api/v1/oauth2-credential/callback',
     '/api/v1/oauth2-credential/refresh',
     '/api/v1/mcp/',
@@ -40,23 +28,13 @@ export const WHITELIST_URLS = [
     '/api/v1/text-to-speech/abort'
 ]
 
-export const API_KEY_BLACKLIST_URLS = [
-    '/api/v1/nvidia-nim',
-    '/api/v1/account/delete',
-    '/api/v1/files',
-    '/api/v1/organizationuser',
-    '/api/v1/workspace',
-    '/api/v1/workspaceuser'
-]
+export const API_KEY_BLACKLIST_URLS = ['/api/v1/nvidia-nim']
 
 export const enum GeneralErrorMessage {
     FORBIDDEN = 'Forbidden',
     UNAUTHORIZED = 'Unauthorized',
     UNHANDLED_EDGE_CASE = 'Unhandled Edge Case',
-    INVALID_PASSWORD = 'Invalid Password',
-    NOT_ALLOWED_TO_DELETE_OWNER = 'Not Allowed To Delete Owner',
-    INTERNAL_SERVER_ERROR = 'Internal Server Error',
-    SMTP_NOT_CONFIGURED = 'Email (SMTP) is not configured on this server'
+    INTERNAL_SERVER_ERROR = 'Internal Server Error'
 }
 
 export const enum GeneralSuccessMessage {
@@ -141,13 +119,3 @@ export const DEFAULT_ALLOWED_OAUTH2_DOMAINS = [
     'discord.com',
     'api.pipedream.com'
 ]
-
-export const LICENSE_QUOTAS = {
-    // Renew per month
-    PREDICTIONS_LIMIT: 'quota:predictions',
-    // Static
-    FLOWS_LIMIT: 'quota:flows',
-    USERS_LIMIT: 'quota:users',
-    STORAGE_LIMIT: 'quota:storage',
-    ADDITIONAL_SEATS_LIMIT: 'quota:additionalSeats'
-} as const

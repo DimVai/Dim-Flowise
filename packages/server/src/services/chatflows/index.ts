@@ -11,8 +11,8 @@ import { ChatMessage } from '../../database/entities/ChatMessage'
 import { ChatMessageFeedback } from '../../database/entities/ChatMessageFeedback'
 import { ScheduleTriggerType } from '../../database/entities/ScheduleRecord'
 import { UpsertHistory } from '../../database/entities/UpsertHistory'
-import { Workspace } from '../../enterprise/database/entities/workspace.entity'
-import { getWorkspaceSearchOptions } from '../../enterprise/utils/ControllerServiceUtils'
+import { COMMUNITY_WORKSPACE_ID } from '../../community-auth/constants'
+import { getWorkspaceSearchOptions } from '../../community-auth/workspace'
 import { InternalFlowiseError } from '../../errors/internalFlowiseError'
 import { getErrorMessage } from '../../errors/utils'
 import { ScheduleBeat } from '../../schedule/ScheduleBeat'
@@ -208,15 +208,13 @@ const getAllChatflows = async (type?: ChatflowType, workspaceId?: string, page: 
     }
 }
 
-async function getAllChatflowsCountByOrganization(type: ChatflowType, organizationId: string): Promise<number> {
+async function getAllChatflowsCountByOrganization(type: ChatflowType, _organizationId: string): Promise<number> {
     try {
         const appServer = getRunningExpressApp()
 
-        const workspaces = await appServer.AppDataSource.getRepository(Workspace).findBy({ organizationId })
-        const workspaceIds = workspaces.map((workspace) => workspace.id)
         const chatflowsCount = await appServer.AppDataSource.getRepository(ChatFlow).countBy({
             type,
-            workspaceId: In(workspaceIds)
+            workspaceId: COMMUNITY_WORKSPACE_ID
         })
 
         return chatflowsCount
@@ -429,7 +427,7 @@ const saveChatflow = async (
         }
     }
 
-    const productId = await appServer.identityManager.getProductIdFromSubscription(subscriptionId)
+    const productId = ''
 
     await appServer.telemetry.sendTelemetry(
         'chatflow_created',

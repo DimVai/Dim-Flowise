@@ -11,10 +11,7 @@ import componentsCredentialsRouter from './components-credentials'
 import componentsCredentialsIconRouter from './components-credentials-icon'
 import credentialsRouter from './credentials'
 import customMcpServersRouter from './custom-mcp-servers'
-import datasetRouter from './dataset'
 import documentStoreRouter from './documentstore'
-import evaluationsRouter from './evaluations'
-import evaluatorsRouter from './evaluator'
 import executionsRouter from './executions'
 import exportImportRouter from './export-import'
 import feedbackRouter from './feedback'
@@ -25,7 +22,6 @@ import internalChatmessagesRouter from './internal-chat-messages'
 import internalPredictionRouter from './internal-predictions'
 import leadsRouter from './leads'
 import loadPromptRouter from './load-prompts'
-import logsRouter from './log'
 import marketplacesRouter from './marketplaces'
 import mcpEndpointRouter from './mcp-endpoint'
 import mcpServerRouter from './mcp-server'
@@ -42,7 +38,6 @@ import openaiAssistantsVectorStoreRouter from './openai-assistants-vector-store'
 import openaiRealtimeRouter from './openai-realtime'
 import pingRouter from './ping'
 import predictionRouter from './predictions'
-import pricingRouter from './pricing'
 import promptListsRouter from './prompts-lists'
 import publicChatbotRouter from './public-chatbots'
 import publicChatflowsRouter from './public-chatflows'
@@ -60,17 +55,6 @@ import versionRouter from './versions'
 import webhookRouter from './webhook'
 import webhookListenerRouter from './webhook-listener'
 
-import accountRouter from '../enterprise/routes/account.route'
-import auditRouter from '../enterprise/routes/audit'
-import authRouter from '../enterprise/routes/auth'
-import loginMethodRouter from '../enterprise/routes/login-method.route'
-import organizationUserRoute from '../enterprise/routes/organization-user.route'
-import organizationRouter from '../enterprise/routes/organization.route'
-import roleRouter from '../enterprise/routes/role.route'
-import userRouter from '../enterprise/routes/user.route'
-import workspaceUserRouter from '../enterprise/routes/workspace-user.route'
-import workspaceRouter from '../enterprise/routes/workspace.route'
-import { IdentityManager } from '../IdentityManager'
 import communityAuthRouter from '../community-auth/routes'
 
 const router = express.Router()
@@ -86,10 +70,7 @@ router.use('/chatflows-uploads', chatflowsUploadsRouter)
 router.use('/components-credentials', componentsCredentialsRouter)
 router.use('/components-credentials-icon', componentsCredentialsIconRouter)
 router.use('/credentials', credentialsRouter)
-router.use('/datasets', IdentityManager.checkFeatureByPlan('feat:datasets'), datasetRouter)
 router.use('/document-store', documentStoreRouter)
-router.use('/evaluations', IdentityManager.checkFeatureByPlan('feat:evaluations'), evaluationsRouter)
-router.use('/evaluators', IdentityManager.checkFeatureByPlan('feat:evaluators'), evaluatorsRouter)
 router.use('/export-import', exportImportRouter)
 router.use('/feedback', feedbackRouter)
 router.use('/fetch-links', fetchLinksRouter)
@@ -125,7 +106,6 @@ router.use('/webhook-listener', webhookListenerRouter)
 router.use('/version', versionRouter)
 router.use('/upsert-history', upsertHistoryRouter)
 router.use('/settings', settingsRouter)
-router.use('/pricing', pricingRouter)
 router.use('/nvidia-nim', nvidiaNimRouter)
 router.use('/executions', executionsRouter)
 router.use('/validation', validationRouter)
@@ -136,17 +116,5 @@ router.use('/mcp-server', mcpServerRouter)
 router.use('/mcp', mcpEndpointRouter)
 
 router.use('/auth', communityAuthRouter)
-router.use('/auth', authRouter)
-router.use('/audit', IdentityManager.checkFeatureByPlan('feat:login-activity'), auditRouter)
-router.use('/user', userRouter)
-router.use('/organization', organizationRouter)
-router.use('/role', IdentityManager.checkFeatureByPlan('feat:roles'), roleRouter)
-router.use('/organizationuser', organizationUserRoute)
-router.use('/workspace', workspaceRouter)
-router.use('/workspaceuser', workspaceUserRouter)
-router.use('/account', accountRouter)
-router.use('/loginmethod', loginMethodRouter)
-router.use('/logs', IdentityManager.checkFeatureByPlan('feat:logs'), logsRouter)
-// router.use('/files', IdentityManager.checkFeatureByPlan('feat:files'), filesRouter)
 
 export default router

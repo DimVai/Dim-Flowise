@@ -1,4 +1,8 @@
-import { User } from '../enterprise/database/entities/user.entity'
+type SanitizableUser = {
+    credential?: string
+    tempToken?: string
+    tokenExpiry?: Date
+}
 import { isIPv4, isIPv6, isValidIPAddress } from './ipValidation'
 
 export function sanitizeNullBytes(obj: any): any {
@@ -34,7 +38,7 @@ export function sanitizeNullBytes(obj: any): any {
     return obj
 }
 
-export function sanitizeUser(user: Partial<User>) {
+export function sanitizeUser<T extends SanitizableUser>(user: T): T {
     delete user.credential
     delete user.tempToken
     delete user.tokenExpiry

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { StatusCodes } from 'http-status-codes'
-import { LoggedInUser } from '../../enterprise/Interface.Enterprise'
+import { CommunityAuthUser } from '../../community-auth/types'
 import { InternalFlowiseError } from '../../errors/internalFlowiseError'
 import apikeyService from '../../services/apikey'
 import { getPageAndLimitParams } from '../../utils/pagination'
@@ -8,10 +8,7 @@ import { getPageAndLimitParams } from '../../utils/pagination'
 // Get api keys
 const getAllApiKeys = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const user = req.user as LoggedInUser
-
-        if (req.query?.type === 'organization' && user.isOrganizationAdmin)
-            return res.status(StatusCodes.OK).json(await apikeyService.getAllApiKeysByOrganization(user.activeOrganizationId))
+        const user = req.user as CommunityAuthUser
 
         const { page, limit } = getPageAndLimitParams(req)
         const apiResponse = await apikeyService.getAllApiKeys(user, page, limit)
@@ -37,7 +34,7 @@ const createApiKey = async (req: Request, res: Response, next: NextFunction) => 
                 `Error: apikeyController.createApiKey - permissions must be an array of strings!`
             )
         }
-        const user = req.user as LoggedInUser
+        const user = req.user as CommunityAuthUser
         const apiResponse = await apikeyService.createApiKey(user, req.body.keyName, req.body.permissions)
         return res.json(apiResponse)
     } catch (error) {
@@ -65,7 +62,7 @@ const updateApiKey = async (req: Request, res: Response, next: NextFunction) => 
                 `Error: apikeyController.updateApiKey - permissions must be an array of strings!`
             )
         }
-        const user = req.user as LoggedInUser
+        const user = req.user as CommunityAuthUser
         const apiResponse = await apikeyService.updateApiKey(user, req.params.id, req.body.keyName, req.body.permissions)
         return res.json(apiResponse)
     } catch (error) {
