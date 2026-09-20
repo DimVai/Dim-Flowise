@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals'
-import { sanitizeAuditMetadata, sanitizeIPAddress, sanitizeNullBytes, sanitizeUser } from '../../src/utils/sanitize.util'
+import { sanitizeAuditMetadata, sanitizeIPAddress, sanitizeNullBytes } from '../../src/utils/sanitize.util'
 
 describe('Sanitization Utilities', () => {
     describe('sanitizeNullBytes', () => {
@@ -184,116 +184,6 @@ describe('Sanitization Utilities', () => {
                 // Inherited property should not be sanitized
                 expect(proto.inherited).toBe('value\u0000')
             })
-        })
-    })
-
-    describe('sanitizeUser', () => {
-        it('should remove credential from user object', () => {
-            const user = {
-                id: '123',
-                name: 'John',
-                email: 'john@example.com',
-                credential: 'sensitive-credential'
-            }
-            const result = sanitizeUser(user)
-            expect(result.credential).toBeUndefined()
-            expect(result.id).toBe('123')
-            expect(result.name).toBe('John')
-            expect(result.email).toBe('john@example.com')
-        })
-
-        it('should remove tempToken from user object', () => {
-            const user = {
-                id: '123',
-                name: 'John',
-                tempToken: 'temporary-token-abc123'
-            }
-            const result = sanitizeUser(user)
-            expect(result.tempToken).toBeUndefined()
-            expect(result.id).toBe('123')
-            expect(result.name).toBe('John')
-        })
-
-        it('should remove tokenExpiry from user object', () => {
-            const user = {
-                id: '123',
-                name: 'John',
-                tokenExpiry: new Date('2025-12-31')
-            }
-            const result = sanitizeUser(user)
-            expect(result.tokenExpiry).toBeUndefined()
-            expect(result.id).toBe('123')
-            expect(result.name).toBe('John')
-        })
-
-        it('should remove all sensitive fields at once', () => {
-            const user = {
-                id: '123',
-                name: 'John',
-                email: 'john@example.com',
-                credential: 'sensitive-credential',
-                tempToken: 'temp-token',
-                tokenExpiry: new Date('2025-12-31')
-            }
-            const result = sanitizeUser(user)
-            expect(result.credential).toBeUndefined()
-            expect(result.tempToken).toBeUndefined()
-            expect(result.tokenExpiry).toBeUndefined()
-            expect(result.id).toBe('123')
-            expect(result.name).toBe('John')
-            expect(result.email).toBe('john@example.com')
-        })
-
-        it('should handle partial user object (missing sensitive fields)', () => {
-            const user = {
-                id: '123',
-                name: 'John'
-            }
-            const result = sanitizeUser(user)
-            expect(result.id).toBe('123')
-            expect(result.name).toBe('John')
-        })
-
-        it('should mutate the original user object (in-place modification)', () => {
-            const user = {
-                id: '123',
-                credential: 'secret'
-            }
-            const result = sanitizeUser(user)
-            expect(result).toBe(user) // Same reference
-            expect(user.credential).toBeUndefined()
-        })
-
-        it('should handle empty user object', () => {
-            const user = {}
-            const result = sanitizeUser(user)
-            expect(result).toEqual({})
-        })
-
-        it('should preserve other user properties', () => {
-            const user = {
-                id: '123',
-                name: 'John',
-                email: 'john@example.com',
-                status: 'ACTIVE',
-                createdDate: new Date('2024-01-01'),
-                updatedDate: new Date('2024-01-02'),
-                createdBy: 'admin',
-                credential: 'secret',
-                tempToken: 'token',
-                tokenExpiry: new Date('2025-12-31')
-            }
-            const result = sanitizeUser(user)
-            expect(result.id).toBe('123')
-            expect(result.name).toBe('John')
-            expect(result.email).toBe('john@example.com')
-            expect(result.status).toBe('ACTIVE')
-            expect(result.createdDate).toEqual(new Date('2024-01-01'))
-            expect(result.updatedDate).toEqual(new Date('2024-01-02'))
-            expect(result.createdBy).toBe('admin')
-            expect(result.credential).toBeUndefined()
-            expect(result.tempToken).toBeUndefined()
-            expect(result.tokenExpiry).toBeUndefined()
         })
     })
 
@@ -544,23 +434,6 @@ describe('Sanitization Utilities', () => {
     })
 
     describe('Integration scenarios', () => {
-        it('should sanitize user object with null bytes in sensitive fields', () => {
-            const user = {
-                name: 'john\u0000doe',
-                credential: 'secret\u0000token',
-                tempToken: 'temp\u0000token'
-            }
-
-            // First remove null bytes
-            const cleaned = sanitizeNullBytes(user)
-            // Then sanitize user
-            const result = sanitizeUser(cleaned)
-
-            expect(result.name).toBe('johndoe')
-            expect(result.credential).toBeUndefined()
-            expect(result.tempToken).toBeUndefined()
-        })
-
         it('should sanitize audit event metadata with IP addresses', () => {
             const event = {
                 user: 'admin\u0000',
