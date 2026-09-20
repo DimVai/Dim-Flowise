@@ -1,0 +1,73 @@
+export const COMMUNITY_USER_ID = '0'
+export const COMMUNITY_WORKSPACE_ID = '0'
+export const COMMUNITY_ORGANIZATION_ID = '0'
+export const COMMUNITY_WORKSPACE_NAME = 'Default Workspace'
+
+export const COMMUNITY_AUTH_COOKIE = 'flowise_auth'
+export const COMMUNITY_AUTH_DEFAULT_TOKEN_DURATION = '24h'
+export const COMMUNITY_AUTH_ISSUER = 'flowise-community'
+export const COMMUNITY_AUTH_AUDIENCE = 'flowise-community'
+
+export const COMMUNITY_PERMISSIONS = [
+    'agentflows:config',
+    'agentflows:create',
+    'agentflows:delete',
+    'agentflows:update',
+    'agentflows:view',
+    'apikeys:create',
+    'apikeys:delete',
+    'apikeys:update',
+    'apikeys:view',
+    'assistants:create',
+    'assistants:delete',
+    'assistants:update',
+    'assistants:view',
+    'chatflows:config',
+    'chatflows:create',
+    'chatflows:delete',
+    'chatflows:update',
+    'chatflows:view',
+    'credentials:create',
+    'credentials:delete',
+    'credentials:update',
+    'credentials:view',
+    'datasets:create',
+    'datasets:delete',
+    'datasets:update',
+    'datasets:view',
+    'documentStores:add-loader',
+    'documentStores:create',
+    'documentStores:delete',
+    'documentStores:delete-loader',
+    'documentStores:preview-process',
+    'documentStores:update',
+    'documentStores:upsert-config',
+    'documentStores:view',
+    'evaluations:create',
+    'evaluations:delete',
+    'evaluations:run',
+    'evaluations:view',
+    'evaluators:create',
+    'evaluators:delete',
+    'evaluators:update',
+    'evaluators:view',
+    'executions:delete',
+    'executions:update',
+    'executions:view',
+    'logs:view',
+    'templates:custom',
+    'templates:custom-delete',
+    'templates:flowexport',
+    'templates:marketplace',
+    'templates:toolexport',
+    'tools:create',
+    'tools:delete',
+    'tools:update',
+    'tools:view',
+    'variables:create',
+    'variables:delete',
+    'variables:update',
+    'variables:view',
+    'workspace:export',
+    'workspace:import'
+] as const

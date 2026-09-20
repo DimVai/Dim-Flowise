@@ -12,6 +12,10 @@ import authApi from '@/api/auth'
 // Hooks
 import useApi from '@/hooks/useApi'
 
+// store
+import { loginSuccess } from '@/store/reducers/authSlice'
+import { store } from '@/store'
+
 // ==============================|| ResolveLoginPage ||============================== //
 
 const ResolveLoginPage = () => {
@@ -31,6 +35,9 @@ const ResolveLoginPage = () => {
     useEffect(() => {
         setLoading(false)
         if (resolveLogin.data) {
+            if (resolveLogin.data.user) {
+                store.dispatch(loginSuccess(resolveLogin.data.user))
+            }
             window.location.href = resolveLogin.data.redirectUrl
         }
     }, [resolveLogin.data])

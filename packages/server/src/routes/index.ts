@@ -71,6 +71,7 @@ import userRouter from '../enterprise/routes/user.route'
 import workspaceUserRouter from '../enterprise/routes/workspace-user.route'
 import workspaceRouter from '../enterprise/routes/workspace.route'
 import { IdentityManager } from '../IdentityManager'
+import communityAuthRouter from '../community-auth/routes'
 
 const router = express.Router()
 
@@ -134,6 +135,7 @@ router.use('/custom-mcp-servers', customMcpServersRouter)
 router.use('/mcp-server', mcpServerRouter)
 router.use('/mcp', mcpEndpointRouter)
 
+router.use('/auth', communityAuthRouter)
 router.use('/auth', authRouter)
 router.use('/audit', IdentityManager.checkFeatureByPlan('feat:login-activity'), auditRouter)
 router.use('/user', userRouter)

@@ -8,13 +8,13 @@ import path from 'path'
 import { DataSource } from 'typeorm'
 import { AbortControllerPool } from './AbortControllerPool'
 import { CachePool } from './CachePool'
+import { requireCommunityAuth } from './community-auth/middleware'
+import { validateCommunityAuthConfiguration } from './community-auth/service'
+import { CommunityAuthUser } from './community-auth/types'
 import { ChatFlow } from './database/entities/ChatFlow'
 import { getDataSource } from './DataSource'
 import { Organization } from './enterprise/database/entities/organization.entity'
 import { Workspace } from './enterprise/database/entities/workspace.entity'
-import { LoggedInUser } from './enterprise/Interface.Enterprise'
-import { initializeJwtCookieMiddleware, verifyToken, verifyTokenForBullMQDashboard } from './enterprise/middleware/passport'
-import { initAuthSecrets } from './enterprise/utils/authSecrets'
 import { IdentityManager } from './IdentityManager'
 import { MODE, Platform } from './Interface'
 import { IMetricsProvider } from './Interface.Metrics'
@@ -39,9 +39,9 @@ import { getCorsOptions, getIframeSecurityHeaders, sanitizeMiddleware, validateC
 
 declare global {
     namespace Express {
-        interface User extends LoggedInUser {}
+        interface User extends CommunityAuthUser {}
         interface Request {
-            user?: LoggedInUser
+            user?: CommunityAuthUser
         }
         namespace Multer {
             interface File {
@@ -106,10 +106,6 @@ export class App {
             // Initialize encryption key
             await getEncryptionKey()
             logger.info('🔑 [server]: Encryption key initialized successfully')
-
-            // Initialize auth secrets (env → AWS Secrets Manager → filesystem)
-            await initAuthSecrets()
-            logger.info('🔐 [server]: Auth initialized successfully')
 
             // Initialize Rate Limit
             this.rateLimiterManager = RateLimiterManager.getInstance()
@@ -180,17 +176,22 @@ export class App {
         this.app.use(express.json({ limit: flowise_file_size_limit, verify: captureRawBody }))
         this.app.use(express.urlencoded({ limit: flowise_file_size_limit, extended: true, verify: captureRawBody }))
 
-        // Enhanced trust proxy settings for load balancer
-        let trustProxy: string | boolean | number | undefined = process.env.TRUST_PROXY
-        if (typeof trustProxy === 'undefined' || trustProxy.trim() === '' || trustProxy === 'true') {
-            // Default to trust all proxies
-            trustProxy = true
-        } else if (trustProxy === 'false') {
+        // Trust no proxy locally and exactly one Railway edge proxy in deployments.
+        // Never trust an arbitrary X-Forwarded-For chain: login rate limiting relies on req.ip.
+        const configuredTrustProxy = process.env.TRUST_PROXY?.trim()
+        let trustProxy: string | boolean | number
+        if (!configuredTrustProxy) {
+            trustProxy = process.env.RAILWAY_ENVIRONMENT_ID ? 1 : false
+        } else if (configuredTrustProxy === 'true') {
+            throw new Error('TRUST_PROXY=true is unsafe. Use false, a proxy hop count, or trusted proxy addresses.')
+        } else if (configuredTrustProxy === 'false') {
             // Disable trust proxy
             trustProxy = false
-        } else if (!isNaN(Number(trustProxy))) {
+        } else if (!isNaN(Number(configuredTrustProxy))) {
             // Number: Trust specific number of proxies
-            trustProxy = Number(trustProxy)
+            trustProxy = Number(configuredTrustProxy)
+        } else {
+            trustProxy = configuredTrustProxy
         }
 
         this.app.set('trust proxy', trustProxy)
@@ -225,7 +226,7 @@ export class App {
         const URL_CASE_INSENSITIVE_REGEX: RegExp = /\/api\/v1\//i
         const URL_CASE_SENSITIVE_REGEX: RegExp = /\/api\/v1\//
 
-        await initializeJwtCookieMiddleware(this.app, this.identityManager)
+        validateCommunityAuthConfiguration()
 
         this.app.use(async (req, res, next) => {
             // Step 1: Check if the req path contains /api/v1 regardless of case
@@ -237,7 +238,7 @@ export class App {
                     if (isWhitelisted) {
                         next()
                     } else if (req.headers['x-request-from'] === 'internal') {
-                        verifyToken(req, res, next)
+                        requireCommunityAuth(req, res, next)
                     } else {
                         const isAPIKeyBlacklistedURLS = API_KEY_BLACKLIST_URLS.some((url) => req.path.startsWith(url))
                         if (isAPIKeyBlacklistedURLS) {
@@ -299,9 +300,6 @@ export class App {
             }
         })
 
-        // this is for SSO and must be after the JWT cookie middleware
-        await this.identityManager.initializeSSO(this.app)
-
         if (process.env.ENABLE_METRICS === 'true') {
             switch (process.env.METRICS_PROVIDER) {
                 // default to prometheus
@@ -347,7 +345,7 @@ export class App {
             )
 
             const rateLimiter = this.rateLimiterManager.getRateLimiterById(id)
-            this.app.use('/admin/queues', rateLimiter, verifyTokenForBullMQDashboard, this.queueManager.getBullBoardRouter())
+            this.app.use('/admin/queues', rateLimiter, requireCommunityAuth, this.queueManager.getBullBoardRouter())
         }
 
         // ----------------------------------------

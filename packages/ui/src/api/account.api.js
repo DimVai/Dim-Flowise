@@ -8,7 +8,7 @@ const resendVerificationEmail = (body) => client.post('/account/resend-verificat
 const forgotPassword = (body) => client.post('/account/forgot-password', body)
 const resetPassword = (body) => client.post('/account/reset-password', body)
 const getBillingData = () => client.post('/account/billing')
-const logout = () => client.post('/account/logout')
+const logout = () => client.post('/auth/logout')
 const deleteAccount = (body) => client.delete('/account/delete', { data: body })
 
 export default {
