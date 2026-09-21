@@ -21,6 +21,8 @@ Changes are collected under **Unreleased** until this fork adopts its own releas
 
 ### Changed
 
+-   The sidebar Assistants link now opens `/assistants/custom` directly. The original `/assistants` page and its route are preserved.
+
 -   Community operations use a fixed single-user/single-workspace context instead of commercial organization and workspace records.
 -   Proxy trust defaults to `false` locally and `1` when Railway provides `RAILWAY_ENVIRONMENT_ID`. `TRUST_PROXY=true` is rejected; explicit proxy hop counts or trusted addresses can be configured.
 -   The server error UI no longer prompts users to create an issue in the upstream repository.
