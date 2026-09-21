@@ -10,7 +10,11 @@ import {
     validateCommunityCredentials
 } from './service'
 
+import { getApiKeyPermissionCatalog, requireOwner } from './permissions'
+
 const router = express.Router()
+
+router.get('/permissions/API_KEY', requireOwner, (_req, res) => res.json(getApiKeyPermissionCatalog()))
 
 const loginRateLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -42,7 +46,7 @@ router.post('/login', loginRateLimiter, (req: Request, res: Response) => {
     return res.json(createCommunityUser(username))
 })
 
-router.post('/logout', (_req: Request, res: Response) => {
+router.post('/logout', requireOwner, (_req: Request, res: Response) => {
     res.clearCookie(COMMUNITY_AUTH_COOKIE, getCommunityAuthClearCookieOptions())
     return res.json({ message: 'logged_out', redirectTo: '/signin' })
 })

@@ -80,6 +80,7 @@ export const validateCommunityCredentials = (username: unknown, password: unknow
 export const createCommunityUser = (username?: string): CommunityAuthUser => {
     const resolvedUsername = username || getCommunityAuthConfig().username
     return {
+        authType: 'owner',
         id: COMMUNITY_USER_ID,
         email: resolvedUsername,
         name: resolvedUsername,

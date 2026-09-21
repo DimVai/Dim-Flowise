@@ -1,64 +1,65 @@
 import express from 'express'
 import chatflowsController from '../../controllers/chatflows'
-import { checkAnyPermission } from '../../community-auth/permissions'
+import { checkFlowPermission } from '../../community-auth/flow-permissions'
+import { authenticateApiKeyFromPath } from '../../community-auth/api-auth'
 const router = express.Router()
 
 // CREATE
 router.post(
     '/',
-    checkAnyPermission('chatflows:create,chatflows:update,agentflows:create,agentflows:update'),
+    checkFlowPermission('create', 'create'),
     chatflowsController.saveChatflow
 )
 
 // READ
 router.get(
     '/',
-    checkAnyPermission('chatflows:view,chatflows:update,agentflows:view,agentflows:update'),
+    checkFlowPermission('view', 'list'),
     chatflowsController.getAllChatflows
 )
 router.get(
     ['/', '/:id'],
-    checkAnyPermission('chatflows:view,chatflows:update,chatflows:delete,agentflows:view,agentflows:update,agentflows:delete'),
+    checkFlowPermission('view'),
     chatflowsController.getChatflowById
 )
-router.get(['/apikey/', '/apikey/:apikey'], chatflowsController.getChatflowByApiKey)
+router.get(['/apikey/', '/apikey/:apikey'], authenticateApiKeyFromPath, checkFlowPermission('view', 'list'), chatflowsController.getChatflowByApiKey)
 
 // UPDATE
 router.put(
     ['/', '/:id'],
-    checkAnyPermission('chatflows:create,chatflows:update,agentflows:create,agentflows:update'),
+    checkFlowPermission('update'),
     chatflowsController.updateChatflow
 )
 
 // DELETE
-router.delete(['/', '/:id'], checkAnyPermission('chatflows:delete,agentflows:delete,assistants:delete'), chatflowsController.deleteChatflow)
+router.delete(['/', '/:id'], checkFlowPermission('delete'), chatflowsController.deleteChatflow)
 
 // WEBHOOK SECRET
-router.post('/:id/webhook-secret', checkAnyPermission('chatflows:update,agentflows:update'), chatflowsController.setWebhookSecret)
-router.delete('/:id/webhook-secret', checkAnyPermission('chatflows:update,agentflows:update'), chatflowsController.clearWebhookSecret)
+router.post('/:id/webhook-secret', checkFlowPermission('update'), chatflowsController.setWebhookSecret)
+router.delete('/:id/webhook-secret', checkFlowPermission('update'), chatflowsController.clearWebhookSecret)
 
 // CHECK FOR CHANGE
 router.get(
     '/has-changed/:id/:lastUpdatedDateTime',
-    checkAnyPermission('chatflows:update,agentflows:update'),
+    checkFlowPermission('view'),
     chatflowsController.checkIfChatflowHasChanged
 )
 
 // SCHEDULE
 router.get(
     '/:id/schedule/status',
-    checkAnyPermission('chatflows:view,chatflows:update,agentflows:view,agentflows:update'),
+    checkFlowPermission('view'),
     chatflowsController.getScheduleStatus
 )
-router.patch('/:id/schedule/enabled', checkAnyPermission('chatflows:update,agentflows:update'), chatflowsController.toggleScheduleEnabled)
+router.patch('/:id/schedule/enabled', checkFlowPermission('update'), chatflowsController.toggleScheduleEnabled)
 router.get(
     '/:id/schedule/trigger-logs',
-    checkAnyPermission('chatflows:view,chatflows:update,agentflows:view,agentflows:update'),
+    checkFlowPermission('view'),
     chatflowsController.getScheduleTriggerLogs
 )
 router.delete(
     '/:id/schedule/trigger-logs',
-    checkAnyPermission('chatflows:update,agentflows:update,executions:delete'),
+    checkFlowPermission('update'),
     chatflowsController.deleteScheduleTriggerLogs
 )
 

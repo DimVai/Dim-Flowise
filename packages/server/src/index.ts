@@ -9,7 +9,7 @@ import { DataSource } from 'typeorm'
 import { AbortControllerPool } from './AbortControllerPool'
 import { CachePool } from './CachePool'
 import { requireCommunityAuth } from './community-auth/middleware'
-import { createCommunityUser, validateCommunityAuthConfiguration } from './community-auth/service'
+import { validateCommunityAuthConfiguration } from './community-auth/service'
 import { CommunityAuthUser } from './community-auth/types'
 import { ChatFlow } from './database/entities/ChatFlow'
 import { getDataSource } from './DataSource'
@@ -26,12 +26,12 @@ import { initWebhookListenerRegistry } from './services/webhook-listener'
 import flowiseApiV1Router from './routes'
 import { UsageCacheManager } from './UsageCacheManager'
 import { getEncryptionKey, getNodeModulesPackagePath } from './utils'
-import { API_KEY_BLACKLIST_URLS, WHITELIST_URLS } from './utils/constants'
+import { createApiAuthentication } from './community-auth/api-auth'
 import logger, { expressRequestLogger } from './utils/logger'
 import { RateLimiterManager } from './utils/rateLimit'
 import { SSEStreamer } from './utils/SSEStreamer'
 import { Telemetry } from './utils/telemetry'
-import { validateAPIKey } from './utils/validateKey'
+
 import { getCorsOptions, getIframeSecurityHeaders, sanitizeMiddleware, validateCorsConfig } from './utils/XSS'
 
 declare global {
@@ -213,48 +213,8 @@ export class App {
         this.app.use(sanitizeMiddleware)
 
         const denylistURLs = process.env.DENYLIST_URLS ? process.env.DENYLIST_URLS.split(',') : []
-        const whitelistURLs = WHITELIST_URLS.filter((url) => !denylistURLs.includes(url))
-        const URL_CASE_INSENSITIVE_REGEX: RegExp = /\/api\/v1\//i
-        const URL_CASE_SENSITIVE_REGEX: RegExp = /\/api\/v1\//
-
         validateCommunityAuthConfiguration()
-
-        this.app.use(async (req, res, next) => {
-            // Step 1: Check if the req path contains /api/v1 regardless of case
-            if (URL_CASE_INSENSITIVE_REGEX.test(req.path)) {
-                // Step 2: Check if the req path is casesensitive
-                if (URL_CASE_SENSITIVE_REGEX.test(req.path)) {
-                    // Step 3: Check if the req path is in the whitelist
-                    const isWhitelisted = whitelistURLs.some((url) => req.path.startsWith(url))
-                    if (isWhitelisted) {
-                        next()
-                    } else if (req.headers['x-request-from'] === 'internal') {
-                        requireCommunityAuth(req, res, next)
-                    } else {
-                        const isAPIKeyBlacklistedURLS = API_KEY_BLACKLIST_URLS.some((url) => req.path.startsWith(url))
-                        if (isAPIKeyBlacklistedURLS) {
-                            return res.status(401).json({ error: 'Unauthorized Access' })
-                        }
-
-                        const { isValid, apiKey } = await validateAPIKey(req)
-                        if (!isValid || !apiKey) {
-                            return res.status(401).json({ error: 'Unauthorized Access' })
-                        }
-
-                        const apiKeyUser = createCommunityUser()
-                        apiKeyUser.permissions = apiKey.permissions
-                        apiKeyUser.isOrganizationAdmin = false
-                        req.user = apiKeyUser
-                        next()
-                    }
-                } else {
-                    return res.status(401).json({ error: 'Unauthorized Access' })
-                }
-            } else {
-                // If the req path does not contain /api/v1, then allow the request to pass through, example: /assets, /canvas
-                next()
-            }
-        })
+        this.app.use(createApiAuthentication(denylistURLs))
 
         if (process.env.ENABLE_METRICS === 'true') {
             switch (process.env.METRICS_PROVIDER) {

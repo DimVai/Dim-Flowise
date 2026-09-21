@@ -10,7 +10,7 @@ router.post('/', checkPermission('apikeys:create'), apikeyController.createApiKe
 router.get('/', checkPermission('apikeys:view'), apikeyController.getAllApiKeys)
 
 // UPDATE
-router.put(['/', '/:id'], checkAnyPermission('apikeys:create,apikeys:update'), apikeyController.updateApiKey)
+router.put(['/', '/:id'], checkAnyPermission('apikeys:update'), apikeyController.updateApiKey)
 
 // DELETE
 router.delete(['/', '/:id'], checkPermission('apikeys:delete'), apikeyController.deleteApiKey)

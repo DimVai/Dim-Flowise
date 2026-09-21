@@ -1,3 +1,4 @@
+import { getPermittedFlowTypes } from '../../community-auth/flow-permissions'
 import { NextFunction, Request, Response } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import { ChatFlow, EnumChatflowType } from '../../database/entities/ChatFlow'
@@ -94,7 +95,8 @@ const getAllChatflows = async (req: Request, res: Response, next: NextFunction) 
             req.query?.type as ChatflowType,
             req.user?.activeWorkspaceId,
             page,
-            limit
+            limit,
+            getPermittedFlowTypes(req, 'view')
         )
         return res.json(apiResponse)
     } catch (error) {
@@ -115,7 +117,7 @@ const getChatflowByApiKey = async (req: Request, res: Response, next: NextFuncti
         if (!apikey) {
             return res.status(401).send('Unauthorized')
         }
-        const apiResponse = await chatflowsService.getChatflowByApiKey(apikey.id, apikey.workspaceId, req.query.keyonly)
+        const apiResponse = await chatflowsService.getChatflowByApiKey(apikey.id, apikey.workspaceId, req.query.keyonly, getPermittedFlowTypes(req, 'view'))
         return res.json(apiResponse)
     } catch (error) {
         next(error)

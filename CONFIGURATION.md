@@ -40,7 +40,32 @@ Changing `FLOWISE_SECRET` invalidates previously signed tokens. Changing only th
 
 `FLOWISE_SECRET` signs login tokens. `FLOWISE_SECRETKEY_OVERWRITE` and `SECRETKEY_PATH` concern encryption of stored integration credentials. They have different purposes; changing one does not replace the other.
 
-Community API keys remain separate from browser authentication. External API clients use API keys on routes that allow them; a login token is not a substitute for an API key. **Current limitation:** permissions are still displayed and stored for each key, but the community route permission middleware does not enforce them. Do not rely on a key marked read-only to prevent write or delete operations. Key validity checks, route exclusions, and flow-specific key checks are separate mechanisms. Review and restoration of API-key permission enforcement are pending; the authenticated owner retains full access to the available community features.
+### API keys and permissions
+
+External management clients authenticate with `Authorization: Bearer <api-key>`. Each request loads the current key and checks the permission required by its endpoint. Invalid or revoked keys return `401`; a valid key without the required permission returns `403`. The authenticated owner keeps full access through the browser's `x-request-from: internal` requests with a valid signed session cookie. That header alone does not grant access, and an owner cookie does not elevate an ordinary API-key request.
+
+Manage permissions in the API Keys dialog. The catalog includes the available community features and excludes workspace administration and removed features. No enterprise users, roles, or RBAC service are involved.
+
+| Operation | Permission behavior |
+| --- | --- |
+| Create, read, update or delete managed objects | Requires the corresponding category/action. Create-only keys cannot update existing objects through PUT. Specialized document-store and template actions retain their named permissions. |
+| Shared chatflow/agentflow endpoints | Check the actual stored flow type, and check the destination type when it changes. Lists are restricted to the readable types before pagination. Agentflows includes both AGENTFLOW and MULTIAGENT. |
+| Chat messages, statistics, leads and feedback listing | Requires view permission for the associated flow category. Message deletion and bulk upsert-history deletion require delete permission for each affected flow category. |
+| Document-store upsert/refresh | Requires `documentStores:upsert-config`, including before upload parsing. |
+| External vector upsert | Requires update permission for the flow category, plus the existing check of the key assigned to the flow. |
+| OAuth credential authorize/refresh | Requires `credentials:update`; refresh is no longer anonymous. The OAuth callback remains a separate public route. |
+| API-key administration | Requires `apikeys:view/create/update/delete` as applicable. Delegated keys cannot grant permissions they lack, or update/delete a key with permissions outside their own set. |
+| Internal prediction/upsert, direct realtime tool execution, settings, NVIDIA NIM and workspace import/export | Requires an owner session. API clients use the external prediction/upsert interfaces. |
+| Component metadata and prompt catalog helpers | Requires at least one supported API-key permission. |
+
+Permissions apply across the single workspace within their resource category; they do not create per-object ownership or isolate tool/custom-code execution.
+
+**Existing keys:** There is no automatic grant or database migration. Existing selected permissions now take effect; integrations that depended on the previous bypass may receive `403`. Edit those keys through the owner UI and grant only the necessary permissions. Unknown/removed permissions do not grant access and cannot be assigned when saving a key. An empty permission list is valid and grants no management access. Permission changes and deletion take effect on the next request without a restart. To replace a secret, create a new key, update integrations and any assigned flows, then delete the old key; there is no new in-place rotation endpoint.
+
+**Flow execution is separate:** Prediction and webhook execution retain their flow-specific key/signature checks. A key with no management permissions can still execute a flow it protects, including that flow's tools and side effects. This is separate from permission to edit the flow definition. The legacy `GET /chatflows/apikey/:apikey` listing now validates the key and requires view permissions; linking a key to a flow alone does not grant access to its definition.
+
+Public chatbot endpoints keep their separate access rules. Public feedback/lead submission remains available; their management GET endpoints require authentication and flow-view permission. Public exceptions match methods and complete route patterns. `DENYLIST_URLS` still removes configured exceptions from the public list.
+
 
 ## Proxy trust
 

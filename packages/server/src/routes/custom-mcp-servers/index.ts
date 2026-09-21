@@ -13,7 +13,7 @@ router.get('/:id', checkPermission('tools:view'), customMcpServersController.get
 router.get('/:id/tools', checkPermission('tools:view'), customMcpServersController.getDiscoveredTools)
 
 // UPDATE
-router.put('/:id', checkAnyPermission('tools:update,tools:create'), customMcpServersController.updateCustomMcpServer)
+router.put('/:id', checkAnyPermission('tools:update'), customMcpServersController.updateCustomMcpServer)
 
 // AUTHORIZE (connect to server & discover tools)
 router.post('/:id/authorize', checkAnyPermission('tools:update,tools:create'), customMcpServersController.authorizeCustomMcpServer)

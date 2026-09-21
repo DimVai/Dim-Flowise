@@ -1,10 +1,10 @@
 import express from 'express'
 import webhookListenerController from '../../controllers/webhook-listener'
-import { checkAnyPermission } from '../../community-auth/permissions'
+import { checkFlowPermission } from '../../community-auth/flow-permissions'
 
 const router = express.Router()
 
-const requireFlowEdit = checkAnyPermission('chatflows:create,chatflows:update,agentflows:create,agentflows:update')
+const requireFlowEdit = checkFlowPermission('update')
 
 router.post('/:id/register', requireFlowEdit, webhookListenerController.registerListener)
 router.get('/:id/stream/:listenerId', requireFlowEdit, webhookListenerController.streamListener)

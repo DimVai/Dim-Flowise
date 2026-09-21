@@ -6,6 +6,12 @@ Changes are collected under **Unreleased** until this fork adopts its own releas
 
 ## Unreleased
 
+### Fixed
+
+- Enforce API-key permissions in community middleware and cover management endpoints that previously lacked checks, including document-store upsert/refresh, messages and history deletion. Read-only management keys cannot use write/delete routes.
+- Check the actual resource category on shared flow routes and filter flow lists before pagination. Prevent delegated API keys from granting permissions they lack or taking over more privileged keys.
+- Restore the owner UI's permission catalog and allow keys with an empty permission list for flow-only use.
+
 ### Added
 
 - Single-user authentication using required `FLOWISE_USERNAME`, `FLOWISE_PASSWORD`, and `FLOWISE_SECRET` environment variables, with a signed `HttpOnly` login cookie and login rate limiting.
@@ -22,7 +28,9 @@ Changes are collected under **Unreleased** until this fork adopts its own releas
 
 ### Documentation corrections
 
-- Corrected the claim that API-key permissions are enforced. They remain stored and displayed, but the community route permission middleware currently bypasses these checks. This documents an existing limitation; it does not change runtime behavior. Permission enforcement remains pending.
+- Clarify the README's distinction between the fork's primary objectives and the supporting changes that arose during their implementation.
+
+- Earlier documentation identified the missing API-key permission enforcement. The runtime restoration is now included under Fixed above.
 
 ### Removed
 
@@ -32,6 +40,9 @@ Changes are collected under **Unreleased** until this fork adopts its own releas
 - Obsolete commercial authentication, email, session, and license settings from the public server `.env.example`; required community authentication settings remain documented there.
 
 ### Operator action
+
+- Review existing API keys: their saved permissions now apply, and empty permissions grant no management access. Previously unrestricted integrations may return `403`. See [API keys and permissions](CONFIGURATION.md#api-keys-and-permissions).
+- Feedback/lead listing, OAuth token refresh and key-based flow-definition listing now require their respective permissions. Internal prediction/upsert and direct realtime tool execution require an owner session; external flow execution retains its separate protection.
 
 - Configure the three required authentication variables before starting the fork; there is no organization/account setup flow. See [Authentication](CONFIGURATION.md#authentication).
 - Back up existing databases before first startup. Community migrations consolidate workspace data into workspace `"0"`; multi-tenant separation is not preserved.

@@ -17,7 +17,7 @@ router.get('/', checkPermission('assistants:view'), openaiAssistantsVectorStoreC
 // UPDATE
 router.put(
     ['/', '/:id'],
-    checkAnyPermission('assistants:create,assistants:update'),
+    checkAnyPermission('assistants:update'),
     openaiAssistantsVectorStoreController.updateAssistantVectorStore
 )
 

@@ -1,6 +1,9 @@
+import { checkAnyPermission, API_KEY_PERMISSIONS } from '../../community-auth/permissions'
 import express from 'express'
 import nodesController from '../../controllers/nodes'
 const router = express.Router()
+
+router.use(checkAnyPermission(API_KEY_PERMISSIONS))
 
 // READ
 router.get('/', nodesController.getAllNodes)

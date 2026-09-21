@@ -1,6 +1,9 @@
+import { requireOwner } from '../../community-auth/permissions'
 import express from 'express'
 import nimController from '../../controllers/nvidia-nim'
 const router = express.Router()
+
+router.use(requireOwner)
 
 // READ
 router.get('/preload', nimController.preload)

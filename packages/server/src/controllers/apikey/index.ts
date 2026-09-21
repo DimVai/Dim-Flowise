@@ -26,7 +26,6 @@ const createApiKey = async (req: Request, res: Response, next: NextFunction) => 
         if (
             !req.body.permissions ||
             !Array.isArray(req.body.permissions) ||
-            req.body.permissions.length === 0 ||
             !req.body.permissions.every((p: any) => typeof p === 'string')
         ) {
             throw new InternalFlowiseError(
@@ -54,7 +53,6 @@ const updateApiKey = async (req: Request, res: Response, next: NextFunction) => 
         if (
             !req.body.permissions ||
             !Array.isArray(req.body.permissions) ||
-            req.body.permissions.length === 0 ||
             !req.body.permissions.every((p: any) => typeof p === 'string')
         ) {
             throw new InternalFlowiseError(
@@ -79,7 +77,7 @@ const deleteApiKey = async (req: Request, res: Response, next: NextFunction) => 
         if (!req.user?.activeWorkspaceId) {
             throw new InternalFlowiseError(StatusCodes.PRECONDITION_FAILED, `Workspace ID is required`)
         }
-        const apiResponse = await apikeyService.deleteApiKey(req.params.id, req.user?.activeWorkspaceId)
+        const apiResponse = await apikeyService.deleteApiKey(req.params.id, req.user)
         return res.json(apiResponse)
     } catch (error) {
         next(error)

@@ -1,4 +1,5 @@
 import { Request } from 'express'
+import { COMMUNITY_WORKSPACE_ID } from '../community-auth/constants'
 import { ChatFlow } from '../database/entities/ChatFlow'
 import { ApiKey } from '../database/entities/ApiKey'
 import { compareKeys } from './apiKey'
@@ -24,7 +25,7 @@ export const validateFlowAPIKey = async (req: Request, chatflow: ChatFlow): Prom
         if (!apiKey) return false
 
         const apiKeyWorkSpaceId = apiKey.workspaceId
-        if (!apiKeyWorkSpaceId) return false
+        if (apiKeyWorkSpaceId !== COMMUNITY_WORKSPACE_ID) return false
 
         if (apiKeyWorkSpaceId !== chatflow.workspaceId) return false
 
@@ -42,11 +43,11 @@ export const validateFlowAPIKey = async (req: Request, chatflow: ChatFlow): Prom
  * @param {Request} req
  * @returns {Promise<{isValid: boolean, apiKey?: ApiKey}>}
  */
-export const validateAPIKey = async (req: Request): Promise<{ isValid: boolean; apiKey?: ApiKey }> => {
+export const validateAPIKey = async (req: Request, keyFromPath?: string): Promise<{ isValid: boolean; apiKey?: ApiKey }> => {
     const authorizationHeader = (req.headers['Authorization'] as string) ?? (req.headers['authorization'] as string) ?? ''
-    if (!authorizationHeader) return { isValid: false }
+    if (!authorizationHeader && !keyFromPath) return { isValid: false }
 
-    const suppliedKey = authorizationHeader.split(`Bearer `).pop()
+    const suppliedKey = keyFromPath ?? authorizationHeader.split(`Bearer `).pop()
     if (!suppliedKey) return { isValid: false }
 
     try {
@@ -54,7 +55,7 @@ export const validateAPIKey = async (req: Request): Promise<{ isValid: boolean; 
         if (!apiKey) return { isValid: false }
 
         const apiKeyWorkSpaceId = apiKey.workspaceId
-        if (!apiKeyWorkSpaceId) return { isValid: false }
+        if (apiKeyWorkSpaceId !== COMMUNITY_WORKSPACE_ID) return { isValid: false }
 
         const apiSecret = apiKey.apiSecret
         if (!apiSecret || !compareKeys(apiSecret, suppliedKey)) {

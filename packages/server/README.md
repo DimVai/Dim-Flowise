@@ -6,7 +6,7 @@ The backend for this community fork: HTTP APIs, authentication, database access,
 
 Use [CONFIGURATION.md](../../CONFIGURATION.md) and the local [.env.example](.env.example). The required login settings are documented there; upstream account setup and commercial identity instructions do not apply.
 
-The server uses a fixed single-user/single-workspace context. External API keys remain distinct from browser login. Their stored permissions are not currently enforced by the community route permission middleware; see the limitation in [Authentication](../../CONFIGURATION.md#authentication).
+The server uses a fixed single-user/single-workspace context. External API keys remain distinct from browser login and enforce their selected management permissions. Empty permissions grant no management access; flow execution has separate key checks. See [API keys and permissions](../../CONFIGURATION.md#api-keys-and-permissions) for the access rules and existing-key behavior.
 
 ## Development and manual tests
 

@@ -1,3 +1,4 @@
+import { checkPermission } from '../../community-auth/permissions'
 /**
  * OAuth2 Authorization Code Flow Implementation
  *
@@ -71,7 +72,7 @@ import { generateErrorPage, generateSuccessPage } from './templates'
 const router = express.Router()
 
 // Initiate OAuth2 authorization flow
-router.post('/authorize/:credentialId', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/authorize/:credentialId', checkPermission('credentials:update'), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { credentialId } = req.params
         const workspaceId = getActiveWorkspaceIdForRequest(req)
@@ -335,7 +336,7 @@ router.get('/callback', async (req: Request, res: Response) => {
 })
 
 // Refresh OAuth2 access token
-router.post('/refresh/:credentialId', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/refresh/:credentialId', checkPermission('credentials:update'), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { credentialId } = req.params
 

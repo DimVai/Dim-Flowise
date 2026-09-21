@@ -1,3 +1,4 @@
+import { checkFlowPermission, checkUpsertHistoryDelete } from '../../community-auth/flow-permissions'
 import express from 'express'
 import upsertHistoryController from '../../controllers/upsert-history'
 const router = express.Router()
@@ -5,10 +6,10 @@ const router = express.Router()
 // CREATE
 
 // READ
-router.get(['/', '/:id'], upsertHistoryController.getAllUpsertHistory)
+router.get(['/', '/:id'], checkFlowPermission('view'), upsertHistoryController.getAllUpsertHistory)
 
 // PATCH
-router.patch('/', upsertHistoryController.patchDeleteUpsertHistory)
+router.patch('/', checkUpsertHistoryDelete, upsertHistoryController.patchDeleteUpsertHistory)
 
 // DELETE
 

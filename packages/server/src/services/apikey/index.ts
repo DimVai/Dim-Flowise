@@ -1,3 +1,4 @@
+import { API_KEY_PERMISSIONS, normalizeApiKeyPermissions } from '../../community-auth/permissions'
 import { StatusCodes } from 'http-status-codes'
 import { v4 as uuidv4 } from 'uuid'
 import { ApiKey } from '../../database/entities/ApiKey'
@@ -17,26 +18,18 @@ import { getRunningExpressApp } from '../../utils/getRunningExpressApp'
  * @throws InternalFlowiseError if validation fails
  */
 function validatePermissions(user: CommunityAuthUser, requestedPermissions: string[], operation: string) {
-    // API Keys should not have workspace or admin permissions
-    // This applies to ALL users, including admins (platform constraint)
-    const hasRestrictedPermissions = requestedPermissions.some(
-        (permission: string) => permission.startsWith('workspace:') || permission.startsWith('admin:')
-    )
-
-    if (hasRestrictedPermissions) {
-        throw new InternalFlowiseError(StatusCodes.BAD_REQUEST, `Cannot ${operation} API key with workspace or admin permissions`)
+    if (!Array.isArray(requestedPermissions) || requestedPermissions.some((permission) => !API_KEY_PERMISSIONS.includes(permission))) {
+        throw new InternalFlowiseError(StatusCodes.BAD_REQUEST, 'Unknown or restricted API-key permission')
     }
+    if (user.authType !== 'owner' && requestedPermissions.some((permission) => !user.permissions.includes(permission))) {
+        throw new InternalFlowiseError(StatusCodes.FORBIDDEN, 'Cannot ' + operation + ' API key with permissions that exceed your own permissions')
+    }
+}
 
-    // User permission validation - only applies to non-admins (authorization check)
-    if (!user.isOrganizationAdmin) {
-        // Check if all requested permissions are included in user permissions
-        const hasInvalidPermissions = requestedPermissions.some((permission: string) => !user.permissions.includes(permission))
-        if (hasInvalidPermissions) {
-            throw new InternalFlowiseError(
-                StatusCodes.BAD_REQUEST,
-                `Cannot ${operation} API key with permissions that exceed your own permissions`
-            )
-        }
+// A delegated key must not take over or revoke a more privileged key by ID.
+function assertCanManageKey(user: CommunityAuthUser, key: ApiKey) {
+    if (user.authType !== 'owner' && normalizeApiKeyPermissions(key.permissions).some((permission) => !user.permissions.includes(permission))) {
+        throw new InternalFlowiseError(StatusCodes.FORBIDDEN, 'Cannot manage an API key with permissions that exceed your own permissions')
     }
 }
 
@@ -68,11 +61,11 @@ const getAllApiKeys = async (user: CommunityAuthUser, page: number = -1, limit: 
 
         // Filter keys based on user permissions
         let filteredKeys = allKeys
-        if (!user.isOrganizationAdmin) {
+        if (user.authType !== 'owner') {
             // Non-admin users can only see API keys whose permissions are a subset of their own
             filteredKeys = allKeys.filter((key) => {
                 // Check if all key permissions are included in user permissions
-                return key.permissions.every((permission: string) => user.permissions.includes(permission))
+                return normalizeApiKeyPermissions(key.permissions).every((permission: string) => user.permissions.includes(permission))
             })
         }
 
@@ -150,23 +143,19 @@ const updateApiKey = async (user: CommunityAuthUser, id: string, keyName: string
     if (!currentKey) {
         throw new InternalFlowiseError(StatusCodes.NOT_FOUND, `ApiKey ${currentKey} not found`)
     }
+    assertCanManageKey(user, currentKey)
     currentKey.keyName = keyName
     currentKey.permissions = permissions
     await appServer.AppDataSource.getRepository(ApiKey).save(currentKey)
     return await getAllApiKeys(user)
 }
 
-const deleteApiKey = async (id: string, workspaceId: string) => {
-    try {
-        const appServer = getRunningExpressApp()
-        const dbResponse = await appServer.AppDataSource.getRepository(ApiKey).delete({ id, workspaceId })
-        if (!dbResponse) {
-            throw new InternalFlowiseError(StatusCodes.NOT_FOUND, `ApiKey ${id} not found`)
-        }
-        return dbResponse
-    } catch (error) {
-        throw new InternalFlowiseError(StatusCodes.INTERNAL_SERVER_ERROR, `Error: apikeyService.deleteApiKey - ${getErrorMessage(error)}`)
-    }
+const deleteApiKey = async (id: string, user: CommunityAuthUser) => {
+    const repository = getRunningExpressApp().AppDataSource.getRepository(ApiKey)
+    const key = await repository.findOneBy({ id, workspaceId: user.activeWorkspaceId })
+    if (!key) throw new InternalFlowiseError(StatusCodes.NOT_FOUND, 'API key not found')
+    assertCanManageKey(user, key)
+    return repository.delete({ id, workspaceId: user.activeWorkspaceId })
 }
 
 const verifyApiKey = async (paramApiKey: string): Promise<string> => {

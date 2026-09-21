@@ -6,6 +6,7 @@ export interface CommunityAssignedWorkspace {
 }
 
 export interface CommunityAuthUser {
+    authType?: 'owner' | 'apiKey'
     id: string
     email: string
     name: string

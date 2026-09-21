@@ -14,7 +14,7 @@ router.get(['/', '/:id'], checkAnyPermission('credentials:create,credentials:upd
 router.get('/:id/reveal', checkAnyPermission('credentials:create,credentials:update'), credentialsController.revealCredentialById)
 
 // UPDATE
-router.put(['/', '/:id'], checkAnyPermission('credentials:create,credentials:update'), credentialsController.updateCredential)
+router.put(['/', '/:id'], checkAnyPermission('credentials:update'), credentialsController.updateCredential)
 
 // DELETE
 router.delete(['/', '/:id'], checkPermission('credentials:delete'), credentialsController.deleteCredentials)

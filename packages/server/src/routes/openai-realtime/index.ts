@@ -1,20 +1,21 @@
 import express from 'express'
 import openaiRealTimeController from '../../controllers/openai-realtime'
-import { checkAnyPermission } from '../../community-auth/permissions'
+import { requireOwner } from '../../community-auth/permissions'
+import { checkFlowPermission } from '../../community-auth/flow-permissions'
 
 const router = express.Router()
 
 // GET
 router.get(
     ['/', '/:id'],
-    checkAnyPermission('chatflows:view,chatflows:create,chatflows:update,chatflows:delete'),
+    checkFlowPermission('view'),
     openaiRealTimeController.getAgentTools
 )
 
 // EXECUTE
 router.post(
     ['/', '/:id'],
-    checkAnyPermission('chatflows:view,chatflows:create,chatflows:update,chatflows:delete'),
+    requireOwner,
     openaiRealTimeController.executeAgentTool
 )
 

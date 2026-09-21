@@ -1,3 +1,4 @@
+import { requireCommunityAuth } from './middleware'
 import cookieParser from 'cookie-parser'
 import express from 'express'
 import request from 'supertest'
@@ -18,6 +19,7 @@ const createTestApp = () => {
     const app = express()
     app.use(express.json())
     app.use(cookieParser())
+    app.use('/auth/logout', requireCommunityAuth)
     app.use('/auth', communityAuthRouter)
     return app
 }

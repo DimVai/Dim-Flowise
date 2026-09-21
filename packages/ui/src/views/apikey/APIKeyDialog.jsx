@@ -312,29 +312,7 @@ const APIKeyDialog = ({ show, dialogProps, onCancel, onConfirm, setError }) => {
         }
     }
 
-    const checkDisabled = () => {
-        if (!keyName || keyName === '') {
-            return true
-        }
-        if (!Object.keys(selectedPermissions).length || !ifPermissionContainsTrue(selectedPermissions)) {
-            return true
-        }
-        return false
-    }
-
-    const ifPermissionContainsTrue = (obj) => {
-        for (const key in obj) {
-            if (typeof obj[key] === 'object' && obj[key] !== null) {
-                // Recursively check nested objects
-                if (ifPermissionContainsTrue(obj[key])) {
-                    return true
-                }
-            } else if (obj[key] === true) {
-                return true
-            }
-        }
-        return false
-    }
+    const checkDisabled = () => !keyName || keyName.trim() === ''
 
     const component = show ? (
         <Dialog
@@ -420,8 +398,11 @@ const APIKeyDialog = ({ show, dialogProps, onCancel, onConfirm, setError }) => {
                     </Box>
                     <div className='permissions-container'>
                         <p>
-                            <span style={{ color: 'red' }}>*&nbsp;&nbsp;</span>Permissions
+                            Permissions
                         </p>
+                        <Typography variant='body2' sx={{ mb: 1 }}>
+                            No permissions grants no management API access. A key can still protect flows it is assigned to.
+                        </Typography>
                         <div className='permissions-list-wrapper'>
                             {permissions &&
                                 Object.keys(permissions).map((category) => (

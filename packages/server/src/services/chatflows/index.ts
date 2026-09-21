@@ -170,7 +170,7 @@ const deleteChatflow = async (
     }
 }
 
-const getAllChatflows = async (type?: ChatflowType, workspaceId?: string, page: number = -1, limit: number = -1) => {
+const getAllChatflows = async (type?: ChatflowType, workspaceId?: string, page: number = -1, limit: number = -1, permittedTypes?: EnumChatflowType[]) => {
     try {
         const appServer = getRunningExpressApp()
 
@@ -193,6 +193,7 @@ const getAllChatflows = async (type?: ChatflowType, workspaceId?: string, page: 
             queryBuilder.andWhere('chat_flow.type = :type', { type: 'CHATFLOW' })
         }
         if (workspaceId) queryBuilder.andWhere('chat_flow.workspaceId = :workspaceId', { workspaceId })
+        if (permittedTypes) queryBuilder.andWhere('chat_flow.type IN (:...permittedTypes)', { permittedTypes })
         const [data, total] = await queryBuilder.getManyAndCount()
 
         if (page > 0 && limit > 0) {
@@ -246,7 +247,7 @@ const getAllChatflowsCount = async (type?: ChatflowType, workspaceId?: string): 
     }
 }
 
-const getChatflowByApiKey = async (apiKeyId: string, workspaceId: string, keyonly?: unknown): Promise<any> => {
+const getChatflowByApiKey = async (apiKeyId: string, workspaceId: string, keyonly?: unknown, permittedTypes?: EnumChatflowType[]): Promise<any> => {
     try {
         // Here we only get chatflows that are bounded by the apikeyid and chatflows that are not bounded by any apikey
         const appServer = getRunningExpressApp()
@@ -262,6 +263,7 @@ const getChatflowByApiKey = async (apiKeyId: string, workspaceId: string, keyonl
                 })
             )
 
+        if (permittedTypes) query.andWhere('cf.type IN (:...permittedTypes)', { permittedTypes })
         const dbResponse = await query.orderBy('cf.name', 'ASC').getMany()
         if (dbResponse.length < 1) {
             throw new InternalFlowiseError(StatusCodes.NOT_FOUND, `Chatflow not found in the database!`)

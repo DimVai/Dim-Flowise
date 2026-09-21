@@ -12,21 +12,27 @@ The upstream baseline is **`flowise@3.1.4`**, commit [`a65f81bb43ef66d3ce734bf0d
 
 ## Differences from upstream
 
+### Major differences
+
+These are the primary changes this fork introduces.
+
 | Change | What it means |
 | --- | --- |
-| Commercial stack removed | Code covered by the FlowiseAI Commercial License and its dependent features have been removed, so the fork retains the community code available under the **Apache License, Version 2.0**. |
-| Single-user authentication | Sign in with the username and password configured through environment variables. There is no account registration, organization setup, or commercial identity service. |
-| Single workspace | Community data uses one fixed workspace. Organizations, multiple workspaces, user/role administration, SSO, MFA, and the enterprise RBAC model are not available. |
+| Commercial stack removed | Code covered by the FlowiseAI Commercial License and the features that depend on it have been removed. The fork retains the community code available under the **Apache License, Version 2.0**. <br> Removed features include login activity, commercial logs, datasets, evaluators, and evaluations, along with their UI and server routes. Community flows, agents, integrations, execution views, and ordinary application logging remain available. |
+| Single-user authentication | An independent single-user authentication mechanism replaces the commercial identity stack. Sign in as the installation owner with the username and password configured through environment variables. There is no account registration, organization setup, or commercial identity service. |
+
+### Minor or technical differences
+
+These changes arose from implementing the major differences above. They adapt the data model, configuration, and access controls to support those goals; they were not independent objectives of the fork.
+
+| Change | What it means |
+| --- | --- |
+| Single workspace | Community data uses one fixed workspace. Organizations, multiple workspaces, user/role administration, SSO, MFA, and the enterprise RBAC model are not available. Existing workspace-scoped records are normalized to workspace `"0"` by the community migrations. Back up an existing database before first starting this fork against it: the conversion consolidates workspace data and does not preserve tenant separation. See [Persistence](CONFIGURATION.md#persistence). |
 | Configurable authentication lifetime | A signed token is stored in an `HttpOnly` cookie. `FLOWISE_JTW_DURATION` controls the token and cookie lifetime, with a default of `24h`. |
-| Explicit proxy trust | Proxy trust defaults to `false` locally and one proxy hop on Railway. Overrides must identify the trusted proxies; unrestricted `TRUST_PROXY=true` is rejected. |
+| Explicit proxy trust | Proxy trust defaults to `false` locally and one proxy hop when Railway provides `RAILWAY_ENVIRONMENT_ID`. Overrides can disable proxy trust or specify trusted hop counts or addresses; unrestricted `TRUST_PROXY=true` is rejected. |
+| API-key permissions | External management requests enforce the permissions selected for each API key. The authenticated owner retains full access. Keys with no permissions grant no management access but can still authorize execution of flows they protect. See [API keys and permissions](CONFIGURATION.md#api-keys-and-permissions) for existing-key behavior and integration changes. |
 
-The removal also includes the commercial UI and server routes for login activity, logs, datasets, evaluators, and evaluations. Community flows, agents, integrations, execution views, and ordinary application logging remain part of the codebase.
-
-Existing workspace-scoped database records are normalized to workspace `"0"` by the community migrations. Back up an existing database before first starting this fork against it: this conversion consolidates workspace data and is not a way to preserve a multi-tenant installation.
-
-See [Configuration](CONFIGURATION.md) for the exact settings and [Changelog](CHANGELOG.md) for the history of this fork's changes.
-
-**API-key permission limitation:** API keys are validated, but their stored permissions are not currently enforced by the community route permission middleware. A read-only selection must not be treated as protection against write or delete operations. See [Authentication](CONFIGURATION.md#authentication) for details; permission enforcement is pending review and restoration.
+See [Configuration](CONFIGURATION.md) for detailed settings and [Changelog](CHANGELOG.md) for the history of this fork's changes.
 
 ## Quick start
 
