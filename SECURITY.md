@@ -6,9 +6,9 @@ This policy applies to this independent community fork. Flowise Cloud, other Flo
 
 The fork is maintained for personal use. It does not offer a bug bounty, guaranteed response times, or a supported-version policy for public releases at this stage.
 
-## Reporting status
+## Reporting a vulnerability
 
-A private security reporting channel has not yet been established. This file will be updated with the reporting destination before the repository's first public publication.
+Report suspected vulnerabilities privately to [dvainanidis@gmail.com](mailto:dvainanidis@gmail.com). Include affected versions, reproduction steps, and the potential impact.
 
 Do not post credentials, personal data, or sensitive vulnerability details in public issues. FlowiseAI's security team is not responsible for reports about this fork.
 

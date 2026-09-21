@@ -28,6 +28,8 @@ Changes are collected under **Unreleased** until this fork adopts its own releas
 
 ### Documentation corrections
 
+- Identify the public repository as `DimVai/Dim-Flowise` and establish the private email contact for security and conduct reports.
+
 - Clarify the README's distinction between the fork's primary objectives and the supporting changes that arose during their implementation.
 
 - Earlier documentation identified the missing API-key permission enforcement. The runtime restoration is now included under Fixed above.

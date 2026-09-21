@@ -56,9 +56,8 @@ further defined and clarified by project maintainers.
 
 ## Enforcement
 
-An incident-reporting contact for this fork has not yet been established and
-will be published here before the repository's first public publication.
-Do not send reports about this fork to FlowiseAI. Once a reporting channel is available, all
+Report incidents privately to [dvainanidis@gmail.com](mailto:dvainanidis@gmail.com).
+Do not send reports about this fork to FlowiseAI. All
 complaints will be reviewed and investigated and will result in a response that
 is deemed necessary and appropriate to the circumstances. The project team is
 obligated to maintain confidentiality with regard to the reporter of an incident.

@@ -1,4 +1,4 @@
-# Flowise Community Fork
+# Dim-Flowise
 
 Build AI agents and workflows visually, using the community core of Flowise.
 
@@ -36,7 +36,7 @@ See [Configuration](CONFIGURATION.md) for detailed settings and [Changelog](CHAN
 
 ## Quick start
 
-Use a checkout of **this repository**. The upstream npm package `flowise`, upstream container images, and upstream deployment templates do not include this fork's changes.
+Use a checkout of **[DimVai/Dim-Flowise](https://github.com/DimVai/Dim-Flowise)**. The upstream npm package `flowise`, upstream container images, and upstream deployment templates do not include this fork's changes.
 
 ### Requirements
 
