@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Outlet } from 'react-router-dom'
 
@@ -9,57 +9,51 @@ import { AppBar, Box, CssBaseline, Toolbar, useMediaQuery } from '@mui/material'
 // project imports
 import Header from './Header'
 import Sidebar from './Sidebar'
-import AnnouncementBanner from './AnnouncementBanner'
 import { drawerWidth, headerHeight } from '@/store/constant'
 import { SET_MENU } from '@/store/actions'
 
-const BANNER_HEIGHT = 45
-const BANNER_DISMISSED_KEY = 'flowise.announcementDismissed'
-
 // styles
-const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' && prop !== 'bannerOffset' })(
-    ({ theme, open, bannerOffset }) => ({
-        ...theme.typography.mainContent,
-        marginTop: `${75 + bannerOffset}px`,
-        ...(!open && {
-            backgroundColor: 'transparent',
-            borderBottomLeftRadius: 0,
-            borderBottomRightRadius: 0,
-            transition: theme.transitions.create('all', {
-                easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.leavingScreen
-            }),
-            marginRight: 0,
-            [theme.breakpoints.up('md')]: {
-                marginLeft: -drawerWidth,
-                width: `calc(100% - ${drawerWidth}px)`
-            },
-            [theme.breakpoints.down('md')]: {
-                marginLeft: '20px',
-                width: `calc(100% - ${drawerWidth}px)`,
-                padding: '16px'
-            },
-            [theme.breakpoints.down('sm')]: {
-                marginLeft: '10px',
-                width: `calc(100% - ${drawerWidth}px)`,
-                padding: '16px',
-                marginRight: '10px'
-            }
+const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open }) => ({
+    ...theme.typography.mainContent,
+    marginTop: '75px',
+    ...(!open && {
+        backgroundColor: 'transparent',
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 0,
+        transition: theme.transitions.create('all', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen
         }),
-        ...(open && {
-            backgroundColor: 'transparent',
-            transition: theme.transitions.create('all', {
-                easing: theme.transitions.easing.easeOut,
-                duration: theme.transitions.duration.enteringScreen
-            }),
-            marginLeft: 0,
-            marginRight: 0,
-            borderBottomLeftRadius: 0,
-            borderBottomRightRadius: 0,
+        marginRight: 0,
+        [theme.breakpoints.up('md')]: {
+            marginLeft: -drawerWidth,
             width: `calc(100% - ${drawerWidth}px)`
-        })
+        },
+        [theme.breakpoints.down('md')]: {
+            marginLeft: '20px',
+            width: `calc(100% - ${drawerWidth}px)`,
+            padding: '16px'
+        },
+        [theme.breakpoints.down('sm')]: {
+            marginLeft: '10px',
+            width: `calc(100% - ${drawerWidth}px)`,
+            padding: '16px',
+            marginRight: '10px'
+        }
+    }),
+    ...(open && {
+        backgroundColor: 'transparent',
+        transition: theme.transitions.create('all', {
+            easing: theme.transitions.easing.easeOut,
+            duration: theme.transitions.duration.enteringScreen
+        }),
+        marginLeft: 0,
+        marginRight: 0,
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 0,
+        width: `calc(100% - ${drawerWidth}px)`
     })
-)
+}))
 
 // ==============================|| MAIN LAYOUT ||============================== //
 
@@ -79,13 +73,6 @@ const MainLayout = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [matchDownMd])
 
-    const [bannerDismissed, setBannerDismissed] = useState(() => localStorage.getItem(BANNER_DISMISSED_KEY) === 'true')
-    const handleDismissBanner = () => {
-        localStorage.setItem(BANNER_DISMISSED_KEY, 'true')
-        setBannerDismissed(true)
-    }
-    const bannerOffset = bannerDismissed ? 0 : BANNER_HEIGHT
-
     return (
         <Box sx={{ display: 'flex' }}>
             <CssBaseline />
@@ -100,17 +87,16 @@ const MainLayout = () => {
                     transition: leftDrawerOpened ? theme.transitions.create('width') : 'none'
                 }}
             >
-                {!bannerDismissed && <AnnouncementBanner onClose={handleDismissBanner} />}
                 <Toolbar sx={{ height: `${headerHeight}px`, borderBottom: '1px solid', borderColor: theme.palette.grey[900] + 25 }}>
                     <Header handleLeftDrawerToggle={handleLeftDrawerToggle} />
                 </Toolbar>
             </AppBar>
 
             {/* drawer */}
-            <Sidebar drawerOpen={leftDrawerOpened} drawerToggle={handleLeftDrawerToggle} bannerOffset={bannerOffset} />
+            <Sidebar drawerOpen={leftDrawerOpened} drawerToggle={handleLeftDrawerToggle} />
 
             {/* main content */}
-            <Main theme={theme} open={leftDrawerOpened} bannerOffset={bannerOffset}>
+            <Main theme={theme} open={leftDrawerOpened}>
                 <Outlet />
             </Main>
         </Box>

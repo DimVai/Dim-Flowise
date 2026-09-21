@@ -16,21 +16,22 @@ The upstream baseline is **`flowise@3.1.4`**, commit [`a65f81bb43ef66d3ce734bf0d
 
 These are the primary changes this fork introduces.
 
-| Change | What it means |
-| --- | --- |
-| Commercial stack removed | Code covered by the FlowiseAI Commercial License and the features that depend on it have been removed. The fork retains the community code available under the **Apache License, Version 2.0**. <br> Removed features include login activity, commercial logs, datasets, evaluators, and evaluations, along with their UI and server routes. Community flows, agents, integrations, execution views, and ordinary application logging remain available. |
-| Single-user authentication | An independent single-user authentication mechanism replaces the commercial identity stack. Sign in as the installation owner with the username and password configured through environment variables. There is no account registration, organization setup, or commercial identity service. |
+| Change                         | What it means                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Commercial stack removed       | Code covered by the FlowiseAI Commercial License and the features that depend on it have been removed. The fork retains the community code available under the **Apache License, Version 2.0**. <br> Removed features include login activity, commercial logs, datasets, evaluators, and evaluations, along with their UI and server routes. Community flows, agents, integrations, execution views, and ordinary application logging remain available. |
+| Single-user authentication     | An independent single-user authentication mechanism replaces the commercial identity stack. Sign in as the installation owner with the username and password configured through environment variables. There is no account registration, organization setup, or commercial identity service.                                                                                                                                                            |
+| Upstream sunset banner removed | The application no longer displays the upstream Flowise sunset announcement or its link.                                                                                                                                                                                                                                                                                                                                                                |
 
 ### Minor or technical differences
 
 These changes arose from implementing the major differences above. They adapt the data model, configuration, and access controls to support those goals; they were not independent objectives of the fork.
 
-| Change | What it means |
-| --- | --- |
-| Single workspace | Community data uses one fixed workspace. Organizations, multiple workspaces, user/role administration, SSO, MFA, and the enterprise RBAC model are not available. Existing workspace-scoped records are normalized to workspace `"0"` by the community migrations. Back up an existing database before first starting this fork against it: the conversion consolidates workspace data and does not preserve tenant separation. See [Persistence](CONFIGURATION.md#persistence). |
-| Configurable authentication lifetime | A signed token is stored in an `HttpOnly` cookie. `FLOWISE_JTW_DURATION` controls the token and cookie lifetime, with a default of `24h`. |
-| Explicit proxy trust | Proxy trust defaults to `false` locally and one proxy hop when Railway provides `RAILWAY_ENVIRONMENT_ID`. Overrides can disable proxy trust or specify trusted hop counts or addresses; unrestricted `TRUST_PROXY=true` is rejected. |
-| API-key permissions | External management requests enforce the permissions selected for each API key. The authenticated owner retains full access. Keys with no permissions grant no management access but can still authorize execution of flows they protect. See [API keys and permissions](CONFIGURATION.md#api-keys-and-permissions) for existing-key behavior and integration changes. |
+| Change                               | What it means                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Single workspace                     | Community data uses one fixed workspace. Organizations, multiple workspaces, user/role administration, SSO, MFA, and the enterprise RBAC model are not available. Existing workspace-scoped records are normalized to workspace `"0"` by the community migrations. Back up an existing database before first starting this fork against it: the conversion consolidates workspace data and does not preserve tenant separation. See [Persistence](CONFIGURATION.md#persistence). |
+| Configurable authentication lifetime | A signed token is stored in an `HttpOnly` cookie. `FLOWISE_JTW_DURATION` controls the token and cookie lifetime, with a default of `24h`.                                                                                                                                                                                                                                                                                                                                        |
+| Explicit proxy trust                 | Proxy trust defaults to `false` locally and one proxy hop when Railway provides `RAILWAY_ENVIRONMENT_ID`. Overrides can disable proxy trust or specify trusted hop counts or addresses; unrestricted `TRUST_PROXY=true` is rejected.                                                                                                                                                                                                                                             |
+| API-key permissions                  | External management requests enforce the permissions selected for each API key. The authenticated owner retains full access. Keys with no permissions grant no management access but can still authorize execution of flows they protect. See [API keys and permissions](CONFIGURATION.md#api-keys-and-permissions) for existing-key behavior and integration changes.                                                                                                           |
 
 See [Configuration](CONFIGURATION.md) for detailed settings and [Changelog](CHANGELOG.md) for the history of this fork's changes.
 
@@ -40,8 +41,8 @@ Use a checkout of **[DimVai/Dim-Flowise](https://github.com/DimVai/Dim-Flowise)*
 
 ### Requirements
 
-- Node.js **24.x**, as declared in the root `package.json`.
-- Corepack configured to use the project's pinned **pnpm 10.26.0**.
+-   Node.js **24.x**, as declared in the root `package.json`.
+-   Corepack configured to use the project's pinned **pnpm 10.26.0**.
 
 From the repository root, enable the Corepack shims if needed and install dependencies:
 
@@ -89,6 +90,8 @@ export NODE_OPTIONS="--max-old-space-size=4096"
 $env:NODE_OPTIONS="--max-old-space-size=4096"
 ```
 
+The root `pnpm start` command serves the existing compiled UI from `packages/ui/build`; it does not rebuild source changes. For changes confined to `packages/ui/src`, stop the server, run `corepack pnpm --filter flowise-ui build` from the repository root, then run `corepack pnpm start`. For changes across packages, use the full `corepack pnpm build` before starting. Stop a foreground server with `Ctrl+C`.
+
 ## Development
 
 After installing dependencies, configuring the server, and building the packages, copy `packages/ui/.env.example` to `packages/ui/.env` if needed. The default development UI port is `8080`.
@@ -101,24 +104,24 @@ The development UI proxies `/api` requests to the server host and port configure
 
 The monorepo contains these packages:
 
-| Package | Purpose |
-| --- | --- |
-| [server](packages/server/README.md) | HTTP API, authentication, persistence, and flow execution |
-| [ui](packages/ui/README.md) | Main React application |
-| [components](packages/components/README.md) | Integration nodes and credential definitions |
-| [api-documentation](packages/api-documentation/README.md) | API reference viewer |
-| [agentflow](packages/agentflow/README.md) | Embeddable agentflow editor |
-| [observe](packages/observe/README.md) | Embeddable execution viewer |
+| Package                                                   | Purpose                                                   |
+| --------------------------------------------------------- | --------------------------------------------------------- |
+| [server](packages/server/README.md)                       | HTTP API, authentication, persistence, and flow execution |
+| [ui](packages/ui/README.md)                               | Main React application                                    |
+| [components](packages/components/README.md)               | Integration nodes and credential definitions              |
+| [api-documentation](packages/api-documentation/README.md) | API reference viewer                                      |
+| [agentflow](packages/agentflow/README.md)                 | Embeddable agentflow editor                               |
+| [observe](packages/observe/README.md)                     | Embeddable execution viewer                               |
 
 For manual verification, `pnpm test` runs the workspace test tasks. Package guides describe more focused commands. Rebuild after changes to packages whose compiled output is consumed by the server.
 
 ## Configuration and documentation
 
-- [Configuration](CONFIGURATION.md): environment variables, authentication, proxy trust, and persistence.
-- [Changelog](CHANGELOG.md): changes introduced by this fork.
-- [Security policy](SECURITY.md): scope and reporting status.
-- [Contribution policy](CONTRIBUTING.md): external contributions are not currently accepted.
-- [Code of conduct](CODE_OF_CONDUCT.md).
+-   [Configuration](CONFIGURATION.md): environment variables, authentication, proxy trust, and persistence.
+-   [Changelog](CHANGELOG.md): changes introduced by this fork.
+-   [Security policy](SECURITY.md): scope and reporting status.
+-   [Contribution policy](CONTRIBUTING.md): external contributions are not currently accepted.
+-   [Code of conduct](CODE_OF_CONDUCT.md).
 
 The [upstream Flowise documentation](https://docs.flowiseai.com/) remains a useful reference for shared community features and integrations. Authentication, commercial features, installation, and deployment can differ; follow this repository's instructions for those areas. Public documentation for this fork is maintained in English.
 

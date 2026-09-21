@@ -19,7 +19,7 @@ import { drawerWidth, headerHeight } from '@/store/constant'
 
 // ==============================|| SIDEBAR DRAWER ||============================== //
 
-const Sidebar = ({ drawerOpen, drawerToggle, window, bannerOffset = 0 }) => {
+const Sidebar = ({ drawerOpen, drawerToggle, window }) => {
     const theme = useTheme()
     const matchUpMd = useMediaQuery(theme.breakpoints.up('md'))
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated)
@@ -40,7 +40,7 @@ const Sidebar = ({ drawerOpen, drawerToggle, window, bannerOffset = 0 }) => {
                 <PerfectScrollbar
                     component='div'
                     style={{
-                        height: !matchUpMd ? 'calc(100vh - 56px)' : `calc(100vh - ${headerHeight + bannerOffset}px)`,
+                        height: !matchUpMd ? 'calc(100vh - 56px)' : `calc(100vh - ${headerHeight}px)`,
                         display: 'flex',
                         flexDirection: 'column'
                     }}
@@ -82,7 +82,7 @@ const Sidebar = ({ drawerOpen, drawerToggle, window, bannerOffset = 0 }) => {
                             background: theme.palette.background.default,
                             color: theme.palette.text.primary,
                             [theme.breakpoints.up('md')]: {
-                                top: `${headerHeight + bannerOffset}px`
+                                top: `${headerHeight}px`
                             },
                             borderRight: drawerOpen ? '1px solid' : 'none',
                             borderColor: drawerOpen ? theme.palette.grey[900] + 25 : 'transparent'
@@ -101,8 +101,7 @@ const Sidebar = ({ drawerOpen, drawerToggle, window, bannerOffset = 0 }) => {
 Sidebar.propTypes = {
     drawerOpen: PropTypes.bool,
     drawerToggle: PropTypes.func,
-    window: PropTypes.object,
-    bannerOffset: PropTypes.number
+    window: PropTypes.object
 }
 
 export default Sidebar
