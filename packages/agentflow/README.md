@@ -1,13 +1,14 @@
 # @flowiseai/agentflow
 
-[![Version](https://img.shields.io/npm/v/@flowiseai/agentflow)](https://www.npmjs.com/package/@flowiseai/agentflow)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](https://github.com/FlowiseAI/Flowise/blob/main/LICENSE.md)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](../../LICENSE.md)
+
+This package is part of the [community fork](../../README.md). Its package name is inherited from upstream; no separate npm release of this fork is currently provided. The component API documentation below is retained for local development and embedding.
 
 > Embeddable React component for building and visualizing AI agent workflows
 
-## Status: Dev
+## Inherited development status
 
-**Current version: `0.0.0-dev.13`**
+The upstream package is a development SDK; see the local `package.json` for its version. This is not a release version for the community fork.
 
 This package is functional and has comprehensive test coverage, but the public API may still change before a stable release. It is suitable for early integration and testing but not yet recommended for production use.
 
@@ -42,13 +43,15 @@ This package is functional and has comprehensive test coverage, but the public A
 -   **Request Interceptor** — Customize outgoing API requests (headers, credentials) via an Axios interceptor callback
 -   **Keyboard Shortcuts** — Cmd/Ctrl+S to save
 
-## Installation
+## Using this checkout
+
+Install dependencies from the repository root using the [Quick start](../../README.md#quick-start), then build this workspace package:
 
 ```bash
-pnpm add @flowiseai/agentflow
+pnpm --filter @flowiseai/agentflow build
 ```
 
-**Peer Dependencies:**
+For a separate embedding application, consume a local build of this checkout. Installing `@flowiseai/agentflow` from npm retrieves the upstream package. Its **peer dependencies** are:
 
 ```bash
 pnpm add react react-dom @mui/material @mui/icons-material @emotion/react @emotion/styled reactflow
@@ -259,11 +262,11 @@ Visit the [examples](./examples) directory for more usage patterns. See [TESTS.m
 
 ## Contributing
 
-This package follows a feature-based architecture with clear separation of concerns. See [ARCHITECTURE.md](./ARCHITECTURE.md) for details on the project structure and development guidelines.
+External contributions are not currently accepted; see the root [contribution policy](../../CONTRIBUTING.md). For local development, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## License
 
-Apache-2.0 — see the repository root [LICENSE.md](https://github.com/FlowiseAI/Flowise/blob/main/LICENSE.md) for details.
+Apache-2.0 — see the repository root [LICENSE.md](../../LICENSE.md) for details.
 
 ---
 

@@ -1,101 +1,55 @@
-<!-- markdownlint-disable MD030 -->
+# Flowise community server
 
-# Flowise
+The backend for this community fork: HTTP APIs, authentication, database access, and flow execution. Start with the root [Quick start](../../README.md#quick-start) to install and run this repository's source.
 
-English | [中文](./README-ZH.md)
+## Configuration
 
-<h3>Build AI Agents, Visually</h3>
+Use [CONFIGURATION.md](../../CONFIGURATION.md) and the local [.env.example](.env.example). The required login settings are documented there; upstream account setup and commercial identity instructions do not apply.
 
-![Flowise](https://github.com/FlowiseAI/Flowise/blob/main/images/flowise_agentflow.gif?raw=true)
+The server uses a fixed single-user/single-workspace context. External API keys remain distinct from browser login. Their stored permissions are not currently enforced by the community route permission middleware; see the limitation in [Authentication](../../CONFIGURATION.md#authentication).
 
-## ⚡Quick Start
+## Development and manual tests
 
-1. Install Flowise
-    ```bash
-    npm install -g flowise
-    ```
-2. Start Flowise
-
-    ```bash
-    npx flowise start
-    ```
-
-3. Open [http://localhost:3000](http://localhost:3000)
-
-## 🌱 Env Variables
-
-Flowise support different environment variables to configure your instance. You can specify the following variables in the `.env` file inside `packages/server` folder. Read [more](https://github.com/FlowiseAI/Flowise/blob/main/CONTRIBUTING.md#-env-variables)
-
-You can also specify the env variables when using `npx`. For example:
-
-```
-npx flowise start --PORT=3000 --DEBUG=true
-```
-
-## 📖 Tests
-
-We use [Cypress](https://github.com/cypress-io) for our e2e testing. If you want to run the test suite in dev mode please follow this guide:
+The [root development guide](../../README.md#development) explains the full application setup. To run server tests manually from the repository root:
 
 ```sh
-cd Flowise/packages/server
-pnpm install
-./node_modules/.bin/cypress install
-pnpm build
-#Only for writing new tests on local dev -> pnpm run cypress:open
-pnpm run e2e
+pnpm --filter "./packages/server" test
 ```
 
-## 📖 Documentation
+The path filter is intentional: the root and server packages share the name `flowise`. Unit tests are co-located with their source files as `*.test.ts`. Authentication and single-workspace tests are under `src/community-auth/`.
 
-[Flowise Docs](https://docs.flowiseai.com/)
+## Adding or modifying credential definitions
 
-## 🌐 Self Host
+Credential definitions live in `packages/components/credentials/`. Each input field has a `type` that controls both UI rendering and how the value is handled on the server.
 
--   [AWS](https://docs.flowiseai.com/deployment/aws)
--   [Azure](https://docs.flowiseai.com/deployment/azure)
--   [Digital Ocean](https://docs.flowiseai.com/deployment/digital-ocean)
--   [GCP](https://docs.flowiseai.com/deployment/gcp)
--   <details>
-      <summary>Others</summary>
+**Security rule: any field that contains a secret must use `type: 'url'` or `type: 'password'` — never `type: 'string'`.**
 
-    -   [Railway](https://docs.flowiseai.com/deployment/railway)
+The server redacts both `url` and `password` fields before returning credential data to the client. Fields typed `string` are returned in plaintext, rather than being treated as secret fields by the credentials API.
 
-        [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/pn4G8S?referralCode=WVNPD9)
+Use `type: 'url'` for connection strings with embedded credentials:
 
-    -   [Render](https://docs.flowiseai.com/deployment/render)
+-   Connection URLs that embed a username/password (e.g. `mongodb+srv://user:pass@host/db`, `redis://:pass@host`, `postgresql://user:pass@host/db`)
+-   Displayed with the password portion masked (e.g. `mongodb+srv://user:••••••@host/db`); the edit UI can reveal the full URL
 
-        [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://docs.flowiseai.com/deployment/render)
+Use `type: 'password'` for opaque secrets with no meaningful preview:
 
-    -   [HuggingFace Spaces](https://docs.flowiseai.com/configuration/deployment/hugging-face)
+-   API keys, access keys, secret keys, tokens
+-   JSON blobs containing private keys or certificates (e.g. Google service account JSON)
+-   Fully redacted in the UI; users must replace the entire value to update them
 
-        <a href="https://huggingface.co/spaces/FlowiseAI/Flowise"><img src="https://huggingface.co/datasets/huggingface/badges/raw/main/open-in-hf-spaces-sm.svg" alt="HuggingFace Spaces"></a>
+Fields that are safe as `type: 'string'`:
 
-    -   [Elestio](https://elest.io/open-source/flowiseai)
+-   Usernames / account names (when the password is a separate field)
+-   Region, host, port, database name, project ID
+-   Non-secret identifiers and configuration values
 
-        [![Deploy on Elestio](https://elest.io/images/logos/deploy-to-elestio-btn.png)](https://elest.io/open-source/flowiseai)
+If in doubt, use `type: 'password'`. The only cost is that the field must be re-entered on edit; the cost of using `type: 'string'` for a secret is that it is exposed via the API.
 
-    -   [Sealos](https://cloud.sealos.io/?openapp=system-template%3FtemplateName%3Dflowise)
 
-        [![](https://raw.githubusercontent.com/labring-actions/templates/main/Deploy-on-Sealos.svg)](https://cloud.sealos.io/?openapp=system-template%3FtemplateName%3Dflowise)
+## API reference
 
-    -   [RepoCloud](https://repocloud.io/details/?app_id=29)
+See the [API documentation package](../api-documentation/README.md). General node and flow concepts are also covered in the [upstream Flowise docs](https://docs.flowiseai.com/); follow this fork's local documentation for authentication and deployment.
 
-        [![Deploy on RepoCloud](https://d16t0pc4846x52.cloudfront.net/deploy.png)](https://repocloud.io/details/?app_id=29)
+## License
 
-      </details>
-
-## ☁️ Flowise Cloud
-
-[Get Started with Flowise Cloud](https://flowiseai.com/)
-
-## 🙋 Support
-
-Feel free to ask any questions, raise problems, and request new features in [discussion](https://github.com/FlowiseAI/Flowise/discussions)
-
-## 🙌 Contributing
-
-See [contributing guide](https://github.com/FlowiseAI/Flowise/blob/master/CONTRIBUTING.md). Reach out to us at [Discord](https://discord.gg/jbaHfsRVBW) if you have any questions or issues.
-
-## 📄 License
-
-Source code in this repository is made available under the [Apache License Version 2.0](https://github.com/FlowiseAI/Flowise/blob/master/LICENSE.md).
+[Apache License, Version 2.0](../../LICENSE.md). Based on the [original Flowise project](https://github.com/flowiseai/flowise).

@@ -1,19 +1,20 @@
 # @flowiseai/observe
 
-[![Version](https://img.shields.io/npm/v/@flowiseai/observe)](https://www.npmjs.com/package/@flowiseai/observe)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](https://github.com/FlowiseAI/Flowise/blob/main/LICENSE.md)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](../../LICENSE.md)
 
-> Embeddable React components for visualizing AI agent runtime observability — executions, evaluations, and more
+This package is part of the [community fork](../../README.md). Its package name is inherited from upstream; no separate npm release of this fork is currently provided. The component API documentation below is retained for local development and embedding.
 
-## ⚠️ Status
+> Embeddable React components for visualizing AI agent executions and their runtime details
 
-**This package is currently under active development.**
+## Inherited development status
+
+**The upstream package was documented as a development SDK.** Its inherited limitations are listed below; they do not constitute a new verification of this fork.
 
 -   🚧 Components are not yet fully functional
 -   ❌ End-to-end functionality is not complete
--   🔄 Features are still being implemented and tested
+-   🔄 Feature implementation and testing remain incomplete
 -   ⚡ APIs may change before stable release
--   📝 Documentation is being updated as development progresses
+-   📝 The component documentation is retained from the upstream baseline, with fork-specific setup notes
 
 **Cannot be used in production. For development and testing purposes only.**
 
@@ -36,13 +37,15 @@ This is the "Observe" layer of the Build-Run-Observe trio alongside `@flowiseai/
 -   **Dark Mode** — Full light/dark theme support via design tokens and CSS variables
 -   **SDK-Owned Theme** — No host theme required; `ObserveProvider` injects its own MUI theme
 
-## Installation
+## Using this checkout
+
+Install dependencies from the repository root using the [Quick start](../../README.md#quick-start), then build this workspace package:
 
 ```bash
-pnpm add @flowiseai/observe
+pnpm --filter @flowiseai/observe build
 ```
 
-**Peer Dependencies:**
+For a separate embedding application, consume a local build of this checkout. Installing `@flowiseai/observe` from npm retrieves the upstream package. Its **peer dependencies** are:
 
 ```bash
 pnpm add react react-dom @mui/material @mui/icons-material @emotion/react @emotion/styled
@@ -279,37 +282,7 @@ Visit the [examples](./examples/README.md) directory for usage demos. See [ARCHI
 
 ## Publishing
 
-### Version Update
-
-```bash
-# Prerelease (for testing / EA)
-npm version prerelease --preid=dev   # 0.0.0-dev.1 → 0.0.0-dev.2
-
-# Patch / Minor / Major (stable)
-npm version patch                    # 0.0.1
-npm version minor                    # 0.1.0
-npm version major                    # 1.0.0
-```
-
-### Verify Before Publishing
-
-```bash
-pnpm build
-npm pack --dry-run
-npm publish --dry-run
-```
-
-### Publish
-
-```bash
-# EA / prerelease — tagged so npm install won't pick it up by default
-npm publish --tag dev
-
-# Stable release
-npm publish
-```
-
-> The `prepublishOnly` script runs `clean` and `build` automatically before every publish.
+This fork has no package publishing process at present. The inherited `@flowiseai/observe` package name does not designate a published build of this fork. External contributions are not currently accepted; see the root [contribution policy](../../CONTRIBUTING.md).
 
 ## Documentation
 
@@ -318,7 +291,7 @@ npm publish
 
 ## License
 
-Apache-2.0 — see the repository root [LICENSE.md](https://github.com/FlowiseAI/Flowise/blob/main/LICENSE.md) for details.
+Apache-2.0 — see the repository root [LICENSE.md](../../LICENSE.md) for details.
 
 ---
 

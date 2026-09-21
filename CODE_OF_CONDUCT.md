@@ -1,6 +1,6 @@
 # Contributor Covenant Code of Conduct
 
-English | [中文](./i18n/CODE_OF_CONDUCT-ZH.md)
+This code applies to this independent community fork. External contributions are not currently accepted; see the [contribution policy](CONTRIBUTING.md).
 
 ## Our Pledge
 
@@ -56,8 +56,9 @@ further defined and clarified by project maintainers.
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported by contacting the project team at hello@flowiseai.com. All
+An incident-reporting contact for this fork has not yet been established and
+will be published here before the repository's first public publication.
+Do not send reports about this fork to FlowiseAI. Once a reporting channel is available, all
 complaints will be reviewed and investigated and will result in a response that
 is deemed necessary and appropriate to the circumstances. The project team is
 obligated to maintain confidentiality with regard to the reporter of an incident.

@@ -1,53 +1,26 @@
-# Flowise Docker Hub Image
+# Inherited Docker configuration
 
-Starts Flowise from [DockerHub Image](https://hub.docker.com/r/flowiseai/flowise)
+These container files are inherited from the original Flowise repository. They have not been adapted and verified as a deployment path for this community fork. The intended deployment target is Railway without Docker; see the root [deployment status](../README.md#deployment-status).
 
-## Usage
+For the current source installation instructions, use the root [Quick start](../README.md#quick-start).
 
-1. Create `.env` file and specify the `PORT` (refer to `.env.example`)
-2. `docker compose up -d`
-3. Open [http://localhost:3000](http://localhost:3000)
-4. You can bring the containers down by `docker compose stop`
+## Which files use upstream images?
 
-## 🌱 Env Variables
+| File | Source |
+| --- | --- |
+| `docker-compose.yml` | Upstream `flowiseai/flowise:latest` image |
+| `docker-compose-queue-prebuilt.yml` | Upstream main and worker images |
+| `worker/docker-compose.yml` | Upstream `flowiseai/flowise-worker:latest` image |
+| `docker-compose-queue-source.yml` | Builds the main and worker images from this checkout's Dockerfiles |
 
-If you like to persist your data (flows, logs, credentials, storage), set these variables in the `.env` file inside `docker` folder:
+Starting an upstream image does not run this fork's community authentication or commercial-code removal.
 
--   DATABASE_PATH=/home/node/.flowise
--   LOG_PATH=/home/node/.flowise/logs
--   SECRETKEY_PATH=/home/node/.flowise
--   BLOB_STORAGE_PATH=/home/node/.flowise/storage
+## Building from this checkout
 
-Flowise also support different environment variables to configure your instance. Read [more](https://docs.flowiseai.com/configuration/environment-variables)
+The source-build files are retained as a starting point. They are not a ready-to-use deployment recipe: review their environment wiring and Dockerfiles before use, including the required authentication settings in [CONFIGURATION.md](../CONFIGURATION.md#authentication). The inherited Docker environment examples can still contain obsolete commercial settings and should not be used as this fork's configuration reference.
 
-> The container runs as the non-root `node` user (uid 1000), whose home directory is `/home/node`. If you bind-mount a host directory (e.g. `~/.flowise`) for persistence, make sure it's writable by that user - on Linux hosts this may require `chown -R 1000:1000 ~/.flowise`.
+The database, integration-credential encryption key, and uploaded files need persistent storage with permissions appropriate for the container user. See [Persistence](../CONFIGURATION.md#persistence).
 
-## Queue Mode:
+## Queue mode
 
-### Building from source:
-
-You can build the images for worker and main from scratch with:
-
-```
-docker compose -f docker-compose-queue-source.yml up -d
-```
-
-Monitor Health:
-
-```
-docker compose -f docker-compose-queue-source.yml ps
-```
-
-### From pre-built images:
-
-You can also use the pre-built images:
-
-```
-docker compose -f docker-compose-queue-prebuilt.yml up -d
-```
-
-Monitor Health:
-
-```
-docker compose -f docker-compose-queue-prebuilt.yml ps
-```
+Queue mode uses Redis to coordinate the main process and execution workers. See the [worker overview](worker/README.md). Queue operation, container deployment, and serverless compatibility have not been confirmed for this fork.

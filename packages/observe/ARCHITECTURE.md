@@ -301,9 +301,9 @@ interface ExecutionsViewerProps {
 
 The SDK never calls the prediction API itself. Approve/Reject buttons are only rendered when `onHumanInput` is provided AND the node is a human input node in INPROGRESS state. This keeps auth and routing logic entirely out of the SDK.
 
-### Tenant Isolation
+### Single-workspace context
 
-Tenant isolation is handled server-side by Flowise's `ExtendRequestContextMiddleware` via request headers. The SDK does not accept or pass a `tenantId` prop — the API returns only what the authenticated token is permitted to see.
+This community fork uses the fixed workspace `"0"` for server-side community queries. It does not provide tenant isolation or selectable organizations/workspaces. The SDK does not accept or pass a `tenantId` prop. The server validates authentication, but its community route permission middleware currently does not enforce stored API-key permissions. The viewer consumes the records returned by that server. See the root [README](../../README.md#differences-from-upstream) and the limitation in the [configuration reference](../../CONFIGURATION.md#authentication).
 
 ---
 

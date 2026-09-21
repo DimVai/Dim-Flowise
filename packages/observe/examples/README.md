@@ -14,7 +14,7 @@ cp .env.example .env
 | Variable | Description |
 | --- | --- |
 | `VITE_API_BASE_URL` | Base URL of your Flowise instance (default: `http://localhost:3000`) |
-| `VITE_API_TOKEN` | API key for authentication — get this from **Flowise UI → Settings → API Keys → Create New Key**. This is an API key, not a user session token. Ensure the key has the necessary permissions for any features you want to exercise (e.g. deleting executions). |
+| `VITE_API_TOKEN` | API key for authentication — get this from **Flowise UI → Settings → API Keys → Create New Key**. This is an API key, not a user session token. Stored permissions are not currently enforced by the community route permission middleware; do not rely on them to block operations such as deleting executions. See [Authentication](../../../CONFIGURATION.md#authentication). |
 | `VITE_FLOW_ID` | _(optional)_ UUID of an agentflow — scopes the Executions Viewer to that flow only. When unset, all executions across every agentflow are shown. Get it from the URL or settings of your agentflow in Flowise UI. |
 | `VITE_EXECUTION_ID` | UUID of a specific execution — used by the Standalone Detail demo. Get it from any execution row in the executions view. |
 | `VITE_AGENTFLOW_CANVAS_URL` | _(optional)_ Base URL of the agentflow canvas — when set, the demos wire `onAgentflowClick` to open `${VITE_AGENTFLOW_CANVAS_URL}/<agentflowId>` in a new tab. When unset, the agentflow chip in the SDK header renders non-clickable. Example: `http://localhost:3000/v2/agentcanvas`. |

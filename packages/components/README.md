@@ -1,19 +1,27 @@
-<!-- markdownlint-disable MD030 -->
+# Flowise community components
 
-# Flowise Components
+Integration nodes and credential definitions used by this community fork.
 
-English | [中文](./README-ZH.md)
+Install and build this package as part of the monorepo using the root [Quick start](../../README.md#quick-start). The upstream `flowise-components` npm package does not contain this fork's changes.
 
-Apps integration for Flowise. Contain Nodes and Credentials.
+## Development
 
-![Flowise](https://github.com/FlowiseAI/Flowise/blob/main/images/flowise_agentflow.gif?raw=true)
+Nodes are under `nodes/`; credential definitions are under `credentials/`. Preserve the [credential field rules](../server/README.md#adding-or-modifying-credential-definitions) when adding or editing a definition.
 
-Install:
+From the repository root, rebuild this package when its compiled output is needed:
 
-```bash
-npm i flowise-components
+```sh
+pnpm --filter flowise-components build
 ```
+
+For manual tests:
+
+```sh
+pnpm --filter flowise-components test
+```
+
+Node-specific README files remain alongside their integrations. General server and custom-tool environment settings are documented in [CONFIGURATION.md](../../CONFIGURATION.md).
 
 ## License
 
-Source code in this repository is made available under the [Apache License Version 2.0](https://github.com/FlowiseAI/Flowise/blob/master/LICENSE.md).
+[Apache License, Version 2.0](../../LICENSE.md). Based on the [original Flowise project](https://github.com/flowiseai/flowise).

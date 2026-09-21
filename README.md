@@ -1,241 +1,129 @@
-<!-- markdownlint-disable MD030 -->
+# Flowise Community Fork
 
-<p align="center">
-<img src="https://github.com/FlowiseAI/Flowise/blob/main/images/flowise_white.svg#gh-light-mode-only">
-<img src="https://github.com/FlowiseAI/Flowise/blob/main/images/flowise_dark.svg#gh-dark-mode-only">
-</p>
+Build AI agents and workflows visually, using the community core of Flowise.
 
-<div align="center">
+## About this fork
 
-[![Release Notes](https://img.shields.io/github/release/FlowiseAI/Flowise)](https://github.com/FlowiseAI/Flowise/releases)
-[![Discord](https://img.shields.io/discord/1087698854775881778?label=Discord&logo=discord)](https://discord.gg/jbaHfsRVBW)
-[![Twitter Follow](https://img.shields.io/twitter/follow/FlowiseAI?style=social)](https://twitter.com/FlowiseAI)
-[![GitHub star chart](https://img.shields.io/github/stars/FlowiseAI/Flowise?style=social)](https://star-history.com/#FlowiseAI/Flowise)
-[![GitHub fork](https://img.shields.io/github/forks/FlowiseAI/Flowise?style=social)](https://github.com/FlowiseAI/Flowise/fork)
+This is an independent personal fork of the original [Flowise project](https://github.com/flowiseai/flowise), maintained for the owner's own installations. It preserves the community core, removes the commercial stack, and adds the changes described below.
 
-English | [繁體中文](./i18n/README-TW.md) | [简体中文](./i18n/README-ZH.md) | [日本語](./i18n/README-JA.md) | [한국어](./i18n/README-KR.md)
+Flowise has been an exceptionally useful project: it made building AI workflows, connecting models and tools, and experimenting with agents accessible through a practical visual interface. This fork exists because of the substantial work of the Flowise team and its contributors. Their contribution remains the foundation of this project, and deserves clear recognition and thanks.
 
-</div>
+The upstream baseline is **`flowise@3.1.4`**, commit [`a65f81bb43ef66d3ce734bf0dff4223ae8041c95`](https://github.com/flowiseai/flowise/commit/a65f81bb43ef66d3ce734bf0dff4223ae8041c95). This fork is maintained independently of FlowiseAI and is not an official Flowise release.
 
-<h3>Build AI Agents, Visually</h3>
-<a href="https://github.com/FlowiseAI/Flowise">
-<img width="100%" src="https://github.com/FlowiseAI/Flowise/blob/main/images/flowise_agentflow.gif?raw=true"></a>
+## Differences from upstream
 
-## 📚 Table of Contents
+| Change | What it means |
+| --- | --- |
+| Commercial stack removed | Code covered by the FlowiseAI Commercial License and its dependent features have been removed, so the fork retains the community code available under the **Apache License, Version 2.0**. |
+| Single-user authentication | Sign in with the username and password configured through environment variables. There is no account registration, organization setup, or commercial identity service. |
+| Single workspace | Community data uses one fixed workspace. Organizations, multiple workspaces, user/role administration, SSO, MFA, and the enterprise RBAC model are not available. |
+| Configurable authentication lifetime | A signed token is stored in an `HttpOnly` cookie. `FLOWISE_JTW_DURATION` controls the token and cookie lifetime, with a default of `24h`. |
+| Explicit proxy trust | Proxy trust defaults to `false` locally and one proxy hop on Railway. Overrides must identify the trusted proxies; unrestricted `TRUST_PROXY=true` is rejected. |
 
--   [⚡ Quick Start](#-quick-start)
--   [🐳 Docker](#-docker)
--   [👨‍💻 Developers](#-developers)
--   [🌱 Env Variables](#-env-variables)
--   [📖 Documentation](#-documentation)
--   [🌐 Self Host](#-self-host)
--   [☁️ Flowise Cloud](#️-flowise-cloud)
--   [🙋 Support](#-support)
--   [🙌 Contributing](#-contributing)
--   [📄 License](#-license)
+The removal also includes the commercial UI and server routes for login activity, logs, datasets, evaluators, and evaluations. Community flows, agents, integrations, execution views, and ordinary application logging remain part of the codebase.
 
-## ⚡Quick Start
+Existing workspace-scoped database records are normalized to workspace `"0"` by the community migrations. Back up an existing database before first starting this fork against it: this conversion consolidates workspace data and is not a way to preserve a multi-tenant installation.
 
-Download and Install [NodeJS](https://nodejs.org/en/download) >= 20.0.0
+See [Configuration](CONFIGURATION.md) for the exact settings and [Changelog](CHANGELOG.md) for the history of this fork's changes.
 
-1. Install Flowise
-    ```bash
-    npm install -g flowise
-    ```
-2. Start Flowise
+**API-key permission limitation:** API keys are validated, but their stored permissions are not currently enforced by the community route permission middleware. A read-only selection must not be treated as protection against write or delete operations. See [Authentication](CONFIGURATION.md#authentication) for details; permission enforcement is pending review and restoration.
 
-    ```bash
-    npx flowise start
-    ```
+## Quick start
 
-3. Open [http://localhost:3000](http://localhost:3000)
+Use a checkout of **this repository**. The upstream npm package `flowise`, upstream container images, and upstream deployment templates do not include this fork's changes.
 
-## 🐳 Docker
+### Requirements
 
-### Docker Compose
+- Node.js **24.x**, as declared in the root `package.json`.
+- Corepack configured to use the project's pinned **pnpm 10.26.0**.
 
-1. Clone the Flowise project
-2. Go to `docker` folder at the root of the project
-3. Copy `.env.example` file, paste it into the same location, and rename to `.env` file
-4. `docker compose up -d`
-5. Open [http://localhost:3000](http://localhost:3000)
-6. You can bring the containers down by `docker compose stop`
+From the repository root, enable the Corepack shims if needed and install dependencies:
 
-### Docker Image
+```sh
+corepack enable
+pnpm install --frozen-lockfile
+```
 
-1. Build the image locally:
+### Configure the server
 
-    ```bash
-    docker build --no-cache -t flowise .
-    ```
+Copy `packages/server/.env.example` to `packages/server/.env` if you do not already have a local configuration.
 
-2. Run image:
+On macOS/Linux:
 
-    ```bash
-    docker run -d --name flowise -p 3000:3000 flowise
-    ```
+```sh
+cp packages/server/.env.example packages/server/.env
+```
 
-3. Stop image:
+On Windows PowerShell:
 
-    ```bash
-    docker stop flowise
-    ```
+```powershell
+Copy-Item packages/server/.env.example packages/server/.env
+```
 
-## 👨‍💻 Developers
+In that file, set `FLOWISE_USERNAME`, `FLOWISE_PASSWORD`, and `FLOWISE_SECRET`. These three settings are required; the server refuses to start without them. Follow the [authentication configuration](CONFIGURATION.md#authentication) for an example and secret requirements.
 
-Flowise has 3 different modules in a single mono repository.
+### Build and start
 
--   `server`: Node backend to serve API logics
--   `ui`: React frontend
--   `components`: Third-party nodes integrations
--   `api-documentation`: Auto-generated swagger-ui API docs from express
+```sh
+pnpm build
+pnpm start
+```
 
-### Prerequisite
+Open [http://localhost:3000](http://localhost:3000), or the port selected by `PORT`, and sign in using your configured credentials.
 
--   Install [PNPM](https://pnpm.io/installation)
-    ```bash
-    npm i -g pnpm
-    ```
+If a build runs out of JavaScript heap memory, set `NODE_OPTIONS=--max-old-space-size=4096` in the current shell before running `pnpm build` again:
 
-### Setup
+```sh
+# macOS / Linux / Git Bash
+export NODE_OPTIONS="--max-old-space-size=4096"
+```
 
-1.  Clone the repository:
+```powershell
+# Windows PowerShell
+$env:NODE_OPTIONS="--max-old-space-size=4096"
+```
 
-    ```bash
-    git clone https://github.com/FlowiseAI/Flowise.git
-    ```
+## Development
 
-2.  Go into repository folder:
+After installing dependencies, configuring the server, and building the packages, copy `packages/ui/.env.example` to `packages/ui/.env` if needed. The default development UI port is `8080`.
 
-    ```bash
-    cd Flowise
-    ```
+```sh
+pnpm dev
+```
 
-3.  Install all dependencies of all modules:
+The development UI proxies `/api` requests to the server host and port configured in `packages/server/.env`. Keep the default same-origin API setup unless you specifically need a separate API origin; this also allows the login cookie to work through the development proxy.
 
-    ```bash
-    pnpm install
-    ```
+The monorepo contains these packages:
 
-4.  Build all the code:
+| Package | Purpose |
+| --- | --- |
+| [server](packages/server/README.md) | HTTP API, authentication, persistence, and flow execution |
+| [ui](packages/ui/README.md) | Main React application |
+| [components](packages/components/README.md) | Integration nodes and credential definitions |
+| [api-documentation](packages/api-documentation/README.md) | API reference viewer |
+| [agentflow](packages/agentflow/README.md) | Embeddable agentflow editor |
+| [observe](packages/observe/README.md) | Embeddable execution viewer |
 
-    ```bash
-    pnpm build
-    ```
+For manual verification, `pnpm test` runs the workspace test tasks. Package guides describe more focused commands. Rebuild after changes to packages whose compiled output is consumed by the server.
 
-    <details>
-    <summary>Exit code 134 (JavaScript heap out of memory)</summary>  
-    If you get this error when running the above `build` script, try increasing the Node.js heap size and run the script again:
+## Configuration and documentation
 
-    ```bash
-    # macOS / Linux / Git Bash
-    export NODE_OPTIONS="--max-old-space-size=4096"
+- [Configuration](CONFIGURATION.md): environment variables, authentication, proxy trust, and persistence.
+- [Changelog](CHANGELOG.md): changes introduced by this fork.
+- [Security policy](SECURITY.md): scope and reporting status.
+- [Contribution policy](CONTRIBUTING.md): external contributions are not currently accepted.
+- [Code of conduct](CODE_OF_CONDUCT.md).
 
-    # Windows PowerShell
-    $env:NODE_OPTIONS="--max-old-space-size=4096"
+The [upstream Flowise documentation](https://docs.flowiseai.com/) remains a useful reference for shared community features and integrations. Authentication, commercial features, installation, and deployment can differ; follow this repository's instructions for those areas. Public documentation for this fork is maintained in English.
 
-    # Windows CMD
-    set NODE_OPTIONS=--max-old-space-size=4096
-    ```
+## Deployment status
 
-    Then run:
+The intended deployment target is Railway without Docker. The final build/start configuration, persistent storage, backups, and serverless sleep/wake behavior have not yet been confirmed for this fork.
 
-    ```bash
-    pnpm build
-    ```
+The [Docker documentation](docker/README.md) describes the inherited container files and their current limitations. They are not a verified deployment path for this fork.
 
-    </details>
+## License and attribution
 
-5.  Start the app:
+The source code in this fork is provided under the [Apache License, Version 2.0](LICENSE.md). The original FlowiseAI copyright and license text are retained. Third-party dependencies remain subject to their own licenses.
 
-    ```bash
-    pnpm start
-    ```
-
-    You can now access the app on [http://localhost:3000](http://localhost:3000)
-
-6.  For development build:
-
-    -   Create `.env` file and specify the `VITE_PORT` (refer to `.env.example`) in `packages/ui`
-    -   Create `.env` file and specify the `PORT` (refer to `.env.example`) in `packages/server`
-    -   Run:
-
-        ```bash
-        pnpm dev
-        ```
-
-    Any code changes will reload the app automatically on [http://localhost:8080](http://localhost:8080)
-
-## 🌱 Env Variables
-
-Flowise supports different environment variables to configure your instance. You can specify the following variables in the `.env` file inside `packages/server` folder. Read [more](https://github.com/FlowiseAI/Flowise/blob/main/CONTRIBUTING.md#-env-variables)
-
-## 📖 Documentation
-
-You can view the Flowise Docs [here](https://docs.flowiseai.com/)
-
-## 🌐 Self Host
-
-Deploy Flowise self-hosted in your existing infrastructure, we support various [deployments](https://docs.flowiseai.com/configuration/deployment)
-
--   [AWS](https://docs.flowiseai.com/configuration/deployment/aws)
--   [Azure](https://docs.flowiseai.com/configuration/deployment/azure)
--   [Digital Ocean](https://docs.flowiseai.com/configuration/deployment/digital-ocean)
--   [GCP](https://docs.flowiseai.com/configuration/deployment/gcp)
--   [Alibaba Cloud](https://computenest.console.aliyun.com/service/instance/create/default?type=user&ServiceName=Flowise社区版)
--   <details>
-      <summary>Others</summary>
-
-    -   [Railway](https://docs.flowiseai.com/configuration/deployment/railway)
-
-        [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/pn4G8S?referralCode=WVNPD9)
-
-    -   [Northflank](https://northflank.com/stacks/deploy-flowiseai)
-
-        [![Deploy to Northflank](https://assets.northflank.com/deploy_to_northflank_smm_36700fb050.svg)](https://northflank.com/stacks/deploy-flowiseai)
-
-    -   [Render](https://docs.flowiseai.com/configuration/deployment/render)
-
-        [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://docs.flowiseai.com/configuration/deployment/render)
-
-    -   [HuggingFace Spaces](https://docs.flowiseai.com/configuration/deployment/hugging-face)
-
-        <a href="https://huggingface.co/spaces/FlowiseAI/Flowise"><img src="https://huggingface.co/datasets/huggingface/badges/raw/main/open-in-hf-spaces-sm.svg" alt="HuggingFace Spaces"></a>
-
-    -   [Elestio](https://elest.io/open-source/flowiseai)
-
-        [![Deploy on Elestio](https://elest.io/images/logos/deploy-to-elestio-btn.png)](https://elest.io/open-source/flowiseai)
-
-    -   [Sealos](https://template.sealos.io/deploy?templateName=flowise)
-
-        [![Deploy on Sealos](https://sealos.io/Deploy-on-Sealos.svg)](https://template.sealos.io/deploy?templateName=flowise)
-
-    -   [RepoCloud](https://repocloud.io/details/?app_id=29)
-
-        [![Deploy on RepoCloud](https://d16t0pc4846x52.cloudfront.net/deploy.png)](https://repocloud.io/details/?app_id=29)
-
-      </details>
-
-## ☁️ Flowise Cloud
-
-Get Started with [Flowise Cloud](https://flowiseai.com/).
-
-## 🙋 Support
-
-Feel free to ask any questions, raise problems, and request new features in [Discussion](https://github.com/FlowiseAI/Flowise/discussions).
-
-## 🙌 Contributing
-
-Thanks go to these awesome contributors
-
-<a href="https://github.com/FlowiseAI/Flowise/graphs/contributors">
-<img src="https://contrib.rocks/image?repo=FlowiseAI/Flowise" />
-</a><br><br>
-
-See [Contributing Guide](CONTRIBUTING.md). Reach out to us at [Discord](https://discord.gg/jbaHfsRVBW) if you have any questions or issues.
-
-[![Star History Chart](https://api.star-history.com/svg?repos=FlowiseAI/Flowise&type=Timeline)](https://star-history.com/#FlowiseAI/Flowise&Date)
-
-## 📄 License
-
-Source code in this repository is made available under the [Apache License Version 2.0](LICENSE.md).
+The original project and its contributors can be found at [github.com/flowiseai/flowise](https://github.com/flowiseai/flowise).
