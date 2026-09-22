@@ -31,6 +31,7 @@ Changes are collected under **Unreleased** until this fork adopts its own releas
 
 ### Changed
 
+-   Hide the upstream GitHub star badge in the header while retaining its component.
 -   Move the optional root Dockerfile to `.github/Dockerfile` so Railway can select Railpack for pnpm deployments, update the manual ECR workflow to use its new path, and remove the automatic Docker-build and upstream-only proprietary-path workflows.
 
 -   The sidebar Assistants link now opens `/assistants/custom` directly. The original `/assistants` page and its route are preserved.
@@ -41,6 +42,8 @@ Changes are collected under **Unreleased** until this fork adopts its own releas
 -   Installation documentation now uses this repository's source and its pinned pnpm version. Upstream npm packages and deployment templates are not presented as installations of this fork.
 
 ### Documentation corrections
+
+-   Record the owner's successful Railway deployment with default build/start commands and observed serverless sleep/wake behavior; persistence and backups remain open.
 
 -   Clarify that `pnpm start` serves the compiled UI and document rebuilding UI-only changes before restarting.
 
@@ -69,4 +72,4 @@ Changes are collected under **Unreleased** until this fork adopts its own releas
 -   Keep the authentication secret separate from the stored-credential encryption key, and preserve the latter along with the database and uploaded files. See [Persistence](CONFIGURATION.md#persistence).
 -   Review proxy trust and set `SECURE_COOKIES=true` when serving the application over HTTPS.
 
-The documentation update was prepared on 2026-09-21. Railway deployment and serverless behavior remain pending; this entry is not a deployment verification report.
+The initial documentation update was prepared on 2026-09-21. Railway deployment and serverless sleep/wake behavior were subsequently confirmed by the owner; persistence and backups remain open.

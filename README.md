@@ -37,8 +37,6 @@ These changes arose from implementing the major differences above. They adapt th
 | Explicit proxy trust                 | Proxy trust defaults to `false` locally and one proxy hop when Railway provides `RAILWAY_ENVIRONMENT_ID`. Overrides can disable proxy trust or specify trusted hop counts or addresses; unrestricted `TRUST_PROXY=true` is rejected.                                                                                                                                                                                                                                             |
 | API-key permissions                  | External management requests enforce the permissions selected for each API key. The authenticated owner retains full access. Keys with no permissions grant no management access but can still authorize execution of flows they protect. See [API keys and permissions](CONFIGURATION.md#api-keys-and-permissions) for existing-key behavior and integration changes.                                                                                                           |
 
-The `/account` page explains that the owner's sign-in details are configured through environment variables. The commercial profile, billing, and subscription controls are not used.
-
 See [Configuration](CONFIGURATION.md) for detailed settings and [Changelog](CHANGELOG.md) for the history of this fork's changes.
 
 ## Quick start
@@ -84,7 +82,7 @@ pnpm build
 pnpm start
 ```
 
-For Railway deployment without a Dockerfile build, the optional Dockerfile is kept at `.github/Dockerfile` so Railpack can detect the root pnpm workspace. The root `packageManager` field pins pnpm 10.26.0. Railpack installs dependencies and can use the root `build` and `start` scripts; set `pnpm build` and `pnpm start` explicitly in Railway if you want those commands fixed in the service settings.
+For Railway deployment without a Dockerfile build, the optional Dockerfile is kept at `.github/Dockerfile` so Railpack can detect the root pnpm workspace. The root `packageManager` field pins pnpm 10.26.0. The deployment is done with Railway's automatically detected install, build, and start commands; no custom build or start command is needed.
 
 Open [http://localhost:3000](http://localhost:3000), or the port selected by `PORT`, and sign in using your configured credentials.
 
@@ -137,7 +135,7 @@ The [upstream Flowise documentation](https://docs.flowiseai.com/) remains a usef
 
 ## Deployment status
 
-The intended deployment target is Railway without Docker. The final build/start configuration, persistent storage, backups, and serverless sleep/wake behavior have not yet been confirmed for this fork.
+The owner confirmed a successful Railway deployment without Docker using the default build and start commands. With Railway Serverless enabled, the service slept when idle and started again successfully on a later request. This reports the observed deployment behavior; persistent storage, backups, and the long-term database choice remain to be finalized.
 
 The [Docker documentation](docker/README.md) describes the inherited container files and their current limitations. They are not a verified deployment path for this fork.
 
