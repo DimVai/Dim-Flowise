@@ -31,6 +31,8 @@ Changes are collected under **Unreleased** until this fork adopts its own releas
 
 ### Changed
 
+-   Move the optional root Dockerfile to `.github/Dockerfile` so Railway can select Railpack for pnpm deployments, update the manual ECR workflow to use its new path, and remove the automatic Docker-build and upstream-only proprietary-path workflows.
+
 -   The sidebar Assistants link now opens `/assistants/custom` directly. The original `/assistants` page and its route are preserved.
 
 -   Community operations use a fixed single-user/single-workspace context instead of commercial organization and workspace records.

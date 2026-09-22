@@ -69,7 +69,7 @@ jobs:
               uses: docker/build-push-action@v6.19.2
               with:
                   context: .
-                  file: Dockerfile
+                  file: .github/Dockerfile
                   build-args: |
                       NODE_VERSION=${{ steps.defaults.outputs.node_version }}
                   platforms: linux/amd64,linux/arm64

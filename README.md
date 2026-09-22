@@ -84,6 +84,8 @@ pnpm build
 pnpm start
 ```
 
+For Railway deployment without a Dockerfile build, the optional Dockerfile is kept at `.github/Dockerfile` so Railpack can detect the root pnpm workspace. The root `packageManager` field pins pnpm 10.26.0. Railpack installs dependencies and can use the root `build` and `start` scripts; set `pnpm build` and `pnpm start` explicitly in Railway if you want those commands fixed in the service settings.
+
 Open [http://localhost:3000](http://localhost:3000), or the port selected by `PORT`, and sign in using your configured credentials.
 
 If a build runs out of JavaScript heap memory, set `NODE_OPTIONS=--max-old-space-size=4096` in the current shell before running `pnpm build` again:
