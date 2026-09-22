@@ -29,7 +29,8 @@ const getVersion = async () => {
             const content = await fs.promises.readFile(packagejsonPath, 'utf8')
             const parsedContent = JSON.parse(content)
             return {
-                version: parsedContent.version
+                version: parsedContent.version,
+                forkVersion: parsedContent.forkVersion
             }
         } catch (error) {
             throw new InternalFlowiseError(StatusCodes.NOT_FOUND, `Version not found- ${getErrorMessage(error)}`)

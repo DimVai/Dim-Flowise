@@ -13,7 +13,10 @@ const AboutDialog = ({ show, onCancel }) => {
 
     useEffect(() => {
         if (show) {
-            const latestReleaseReq = axios.get('https://api.github.com/repos/FlowiseAI/Flowise/releases/latest')
+            const latestReleaseReq = axios.get('https://api.github.com/repos/FlowiseAI/Flowise/releases/latest').catch((error) => {
+                console.error('Error fetching latest Flowise release:', error)
+                return { data: {} }
+            })
             const currentVersionReq = axios.get(`${baseURL}/api/v1/version`, {
                 withCredentials: true,
                 headers: { 'Content-type': 'application/json', 'x-request-from': 'internal' }
@@ -23,7 +26,8 @@ const AboutDialog = ({ show, onCancel }) => {
                 .then(([latestReleaseData, currentVersionData]) => {
                     const finalData = {
                         ...latestReleaseData.data,
-                        currentVersion: currentVersionData.data.version
+                        currentVersion: currentVersionData.data.version,
+                        forkVersion: currentVersionData.data.forkVersion
                     }
                     setData(finalData)
                 })
@@ -45,7 +49,7 @@ const AboutDialog = ({ show, onCancel }) => {
             aria-describedby='alert-dialog-description'
         >
             <DialogTitle sx={{ fontSize: '1rem' }} id='alert-dialog-title'>
-                Flowise Version
+                Versions
             </DialogTitle>
             <DialogContent>
                 {data && (
@@ -53,6 +57,7 @@ const AboutDialog = ({ show, onCancel }) => {
                         <Table aria-label='simple table'>
                             <TableHead>
                                 <TableRow>
+                                    <TableCell>Application</TableCell>
                                     <TableCell>Current Version</TableCell>
                                     <TableCell>Latest Version</TableCell>
                                     <TableCell>Published At</TableCell>
@@ -61,14 +66,31 @@ const AboutDialog = ({ show, onCancel }) => {
                             <TableBody>
                                 <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                                     <TableCell component='th' scope='row'>
-                                        {data.currentVersion}
+                                        Flowise
                                     </TableCell>
+                                    <TableCell>{data.currentVersion || '—'}</TableCell>
+                                    <TableCell>
+                                        {data.html_url ? (
+                                            <a target='_blank' rel='noreferrer' href={data.html_url}>
+                                                {data.name}
+                                            </a>
+                                        ) : (
+                                            '—'
+                                        )}
+                                    </TableCell>
+                                    <TableCell>{data.published_at ? moment(data.published_at).fromNow() : '—'}</TableCell>
+                                </TableRow>
+                                <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                                     <TableCell component='th' scope='row'>
-                                        <a target='_blank' rel='noreferrer' href={data.html_url}>
-                                            {data.name}
+                                        Dim-Flowise
+                                    </TableCell>
+                                    <TableCell>{data.forkVersion || '—'}</TableCell>
+                                    <TableCell>
+                                        <a target='_blank' rel='noreferrer' href='https://github.com/DimVai/Dim-Flowise'>
+                                            GitHub
                                         </a>
                                     </TableCell>
-                                    <TableCell>{moment(data.published_at).fromNow()}</TableCell>
+                                    <TableCell>—</TableCell>
                                 </TableRow>
                             </TableBody>
                         </Table>

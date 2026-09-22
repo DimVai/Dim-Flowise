@@ -20,7 +20,7 @@ const publicRoutes: Record<string, [string[], RegExp]> = {
     '/api/v1/chatflows-streaming': [['GET'], /^\/api\/v1\/chatflows-streaming(?:\/[^\/]+)?\/?$/],
     '/api/v1/chatflows-uploads': [['GET'], /^\/api\/v1\/chatflows-uploads(?:\/[^\/]+)?\/?$/],
     '/api/v1/openai-assistants-file/download': [['POST'], /^\/api\/v1\/openai-assistants-file\/download\/?$/],
-    '/api/v1/feedback': [['POST','PUT'], /^\/api\/v1\/feedback(?:\/[^\/]+)?\/?$/],
+    '/api/v1/feedback': [['POST', 'PUT'], /^\/api\/v1\/feedback(?:\/[^\/]+)?\/?$/],
     '/api/v1/leads': [['POST'], /^\/api\/v1\/leads\/?$/],
     '/api/v1/get-upload-file': [['GET'], /^\/api\/v1\/get-upload-file\/?$/],
     '/api/v1/ip': [['GET'], /^\/api\/v1\/ip\/?$/],
@@ -30,7 +30,7 @@ const publicRoutes: Record<string, [string[], RegExp]> = {
     '/api/v1/auth/resolve': [['POST'], /^\/api\/v1\/auth\/resolve\/?$/],
     '/api/v1/auth/login': [['POST'], /^\/api\/v1\/auth\/login\/?$/],
     '/api/v1/oauth2-credential/callback': [['GET'], /^\/api\/v1\/oauth2-credential\/callback\/?$/],
-    '/api/v1/mcp/': [['POST','DELETE','OPTIONS'], /^\/api\/v1\/mcp\/[^\/]+\/?$/],
+    '/api/v1/mcp/': [['POST', 'DELETE', 'OPTIONS'], /^\/api\/v1\/mcp\/[^\/]+\/?$/],
     '/api/v1/text-to-speech/generate': [['POST'], /^\/api\/v1\/text-to-speech\/generate\/?$/],
     '/api/v1/text-to-speech/abort': [['POST'], /^\/api\/v1\/text-to-speech\/abort\/?$/]
 }
@@ -42,39 +42,43 @@ export const isPublicApiRequest = (method: string, path: string, denylist: strin
         return !denylist.includes(url) && !!rule && (rule[0].includes('*') || rule[0].includes(effectiveMethod)) && rule[1].test(path)
     })
 
-const authenticateKey = (fromPath: boolean): RequestHandler => async (req, res, next) => {
-    try {
-        const { isValid, apiKey } = await validateAPIKey(req, fromPath ? req.params.apikey : undefined)
-        if (!isValid || !apiKey) {
+const authenticateKey =
+    (fromPath: boolean): RequestHandler =>
+    async (req, res, next) => {
+        try {
+            const { isValid, apiKey } = await validateAPIKey(req, fromPath ? req.params.apikey : undefined)
+            if (!isValid || !apiKey) {
+                res.status(401).json({ error: 'Unauthorized Access' })
+                return
+            }
+            const user = createCommunityUser()
+            user.authType = 'apiKey'
+            user.isOrganizationAdmin = false
+            user.role = 'apiKey'
+            user.permissions = normalizeApiKeyPermissions(apiKey.permissions)
+            req.user = user
+            next()
+        } catch (error) {
+            next(error)
+        }
+    }
+
+export const authenticateApiKey: RequestHandler = authenticateKey(false)
+export const authenticateApiKeyFromPath: RequestHandler = authenticateKey(true)
+
+export const createApiAuthentication =
+    (denylist: string[] = []): RequestHandler =>
+    (req, res, next) => {
+        if (!/\/api\/v1\//i.test(req.path)) return next()
+        if (!/\/api\/v1\//.test(req.path)) {
             res.status(401).json({ error: 'Unauthorized Access' })
             return
         }
-        const user = createCommunityUser()
-        user.authType = 'apiKey'
-        user.isOrganizationAdmin = false
-        user.role = 'apiKey'
-        user.permissions = normalizeApiKeyPermissions(apiKey.permissions)
-        req.user = user
-        next()
-    } catch (error) {
-        next(error)
+        if (isPublicApiRequest(req.method, req.path, denylist)) return next()
+        if (req.headers['x-request-from'] === 'internal') return requireCommunityAuth(req, res, next)
+        if (API_KEY_BLACKLIST_URLS.some((url) => req.path.toLowerCase() === url || req.path.toLowerCase().startsWith(url + '/'))) {
+            res.status(401).json({ error: 'Unauthorized Access' })
+            return
+        }
+        return authenticateApiKey(req, res, next)
     }
-}
-
-export const authenticateApiKey = authenticateKey(false)
-export const authenticateApiKeyFromPath = authenticateKey(true)
-
-export const createApiAuthentication = (denylist: string[] = []): RequestHandler => (req, res, next) => {
-    if (!/\/api\/v1\//i.test(req.path)) return next()
-    if (!/\/api\/v1\//.test(req.path)) {
-        res.status(401).json({ error: 'Unauthorized Access' })
-        return
-    }
-    if (isPublicApiRequest(req.method, req.path, denylist)) return next()
-    if (req.headers['x-request-from'] === 'internal') return requireCommunityAuth(req, res, next)
-    if (API_KEY_BLACKLIST_URLS.some((url) => req.path.toLowerCase() === url || req.path.toLowerCase().startsWith(url + '/'))) {
-        res.status(401).json({ error: 'Unauthorized Access' })
-        return
-    }
-    return authenticateApiKey(req, res, next)
-}

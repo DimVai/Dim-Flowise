@@ -8,6 +8,10 @@ Changes are collected under **Unreleased** until this fork adopts its own releas
 
 ### Fixed
 
+-   Add explicit Express handler types to the API-key middleware exports to resolve TypeScript declaration build errors (TS2742).
+
+-   Restore the `/account` page in the main layout with guidance for environment-configured owner credentials.
+-   Restore the `/account` page in the main layout with guidance for environment-configured owner credentials.
 -   Use the POSIX shell bundled with GitHub Desktop for the pre-push hook and enforce LF line endings.
 
 -   Enforce API-key permissions in community middleware and cover management endpoints that previously lacked checks, including document-store upsert/refresh, messages and history deletion. Read-only management keys cannot use write/delete routes.
@@ -15,6 +19,10 @@ Changes are collected under **Unreleased** until this fork adopts its own releas
 -   Restore the owner UI's permission catalog and allow keys with an empty permission list for flow-only use.
 
 ### Added
+
+-   Link to the Dim-Flowise GitHub repository from the About dialog's Latest Version column.
+
+-   Display the Dim-Flowise version below the installed Flowise version in About, sourced from `forkVersion` in `packages/server/package.json` (initial value `1.2`). Installed versions remain available if the upstream release lookup fails.
 
 -   Single-user authentication using required `FLOWISE_USERNAME`, `FLOWISE_PASSWORD`, and `FLOWISE_SECRET` environment variables, with a signed `HttpOnly` login cookie and login rate limiting.
 -   Configurable token and cookie lifetime through `FLOWISE_JTW_DURATION` (default `24h`).

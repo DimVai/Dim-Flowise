@@ -42,6 +42,9 @@ const LoaderConfigPreviewChunks = Loadable(lazy(() => import('@/views/docstore/L
 const VectorStoreConfigure = Loadable(lazy(() => import('@/views/docstore/VectorStoreConfigure')))
 const VectorStoreQuery = Loadable(lazy(() => import('@/views/docstore/VectorStoreQuery')))
 
+// account routing
+const Account = Loadable(lazy(() => import('@/views/account')))
+
 // executions routing
 const Executions = Loadable(lazy(() => import('@/views/agentexecutions')))
 
@@ -204,6 +207,14 @@ const MainRoutes = {
             element: (
                 <RequireAuth permission={'documentStores:view'}>
                     <VectorStoreQuery />
+                </RequireAuth>
+            )
+        },
+        {
+            path: '/account',
+            element: (
+                <RequireAuth>
+                    <Account />
                 </RequireAuth>
             )
         }
