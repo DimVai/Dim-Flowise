@@ -303,7 +303,7 @@ The SDK never calls the prediction API itself. Approve/Reject buttons are only r
 
 ### Single-workspace context
 
-This community fork uses the fixed workspace `"0"` for server-side community queries. It does not provide tenant isolation or selectable organizations/workspaces. The SDK does not accept or pass a `tenantId` prop. The server validates authentication, but its community route permission middleware currently does not enforce stored API-key permissions. The viewer consumes the records returned by that server. See the root [README](../../README.md#differences-from-upstream) and the limitation in the [configuration reference](../../CONFIGURATION.md#authentication).
+This community fork uses the fixed workspace `"0"` for server-side community queries. It does not provide tenant isolation or selectable organizations/workspaces. The SDK does not accept or pass a `tenantId` prop. The server validates authentication and applies the API key's stored management permissions; the viewer consumes the records returned by that server. See the root [README](../../README.md#differences-from-upstream) and [API keys and permissions](../../CONFIGURATION.md#api-keys-and-permissions).
 
 ---
 

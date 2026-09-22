@@ -127,9 +127,8 @@ For manual verification, `pnpm test` runs the workspace test tasks. Package guid
 
 -   [Configuration](CONFIGURATION.md): environment variables, authentication, proxy trust, and persistence.
 -   [Changelog](CHANGELOG.md): changes introduced by this fork.
--   [Security policy](SECURITY.md): scope and reporting status.
+-   [Security note](SECURITY.md): maintenance scope and reporting policy.
 -   [Contribution policy](CONTRIBUTING.md): external contributions are not currently accepted.
--   [Code of conduct](CODE_OF_CONDUCT.md).
 
 The [upstream Flowise documentation](https://docs.flowiseai.com/) remains a useful reference for shared community features and integrations. Authentication, commercial features, installation, and deployment can differ; follow this repository's instructions for those areas. Public documentation for this fork is maintained in English.
 

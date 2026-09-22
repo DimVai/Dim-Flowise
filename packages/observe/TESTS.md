@@ -10,23 +10,23 @@ pnpm test:watch        # Watch mode during development
 
 ## Test Strategy
 
-Tests are prioritized by impact. When modifying a file, add or update tests in the same PR.
+Tests can be selected according to the scope and risk of each change. The commands above are available for manual use when verification is needed.
 
-### Tier 1 — Core Logic (must test)
+### Tier 1 — Core Logic
 
-Pure business logic in `infrastructure/` and critical hooks. These carry the highest risk — a bug here affects every consumer of the SDK. Always test in the same PR when modifying.
+Pure business logic in `infrastructure/` and critical hooks. These are useful candidates for focused tests when their behavior changes.
 
 **What belongs here:** API client methods, context/store, data-transformation hooks (`useExecutionTree`).
 
-### Tier 2 — Feature Hooks (test when changing)
+### Tier 2 — Feature Hooks
 
-Feature-level hooks that orchestrate polling and UI state. Test when adding features or fixing bugs.
+Feature-level hooks that orchestrate polling and UI state may benefit from focused tests when their behavior changes.
 
 **What belongs here:** `useExecutionPoll`, any future pagination or filter hooks.
 
-### Tier 3 — UI Components (test if logic exists)
+### Tier 3 — UI Components
 
-Presentational components that are mostly JSX. Only add tests if the component contains meaningful business logic. Pure layout/display components do not need tests.
+Presentational components that are mostly JSX can be checked manually or with focused tests when their behavior warrants it. Pure layout/display components usually do not need tests.
 
 **Currently classified as Tier 3 (no `coverageThreshold` entry):**
 
@@ -34,7 +34,7 @@ Presentational components that are mostly JSX. Only add tests if the component c
 
 `ExecutionDetail.tsx` was promoted to Tier 2 once it grew real branching (initial-selection rule, copy-id flow, error/loading/empty states). Drag-resize lives in `useResizableSidebar` and the recursive tree renderer in `<ExecutionTreeSidebar>`, both tested in isolation; the orchestrator's own tests cover composition + the auto-select branches.
 
-If any of these grows real branching logic (filter predicates, sort comparators, debounced handlers), promote it to Tier 2 by adding a `coverageThreshold` entry in `jest.config.js` and writing the corresponding tests.
+If these components gain branching logic (filter predicates, sort comparators, debounced handlers), consider focused tests for that behavior.
 
 ## Writing Tests
 
@@ -86,7 +86,7 @@ jest.mock('@/infrastructure/store', () => ({
 
 ## Best Practices
 
-> The same content lives in the `dev-implement-jira` skill so it's discoverable cross-package. Keep both copies in sync when editing.
+These are optional test-writing practices for developers who run package tests.
 
 ### Test behavior, not implementation
 
@@ -132,6 +132,6 @@ Build fixtures with the smallest fields needed to exercise the behavior. Use fac
 
 -   **Jest config**: `jest.config.js` — two projects: `unit` (node env, `.test.ts`) and `components` (custom jsdom env, `.test.tsx`)
 -   **Import aliases**: `@test-utils` maps to `src/__test_utils__`, `@/` maps to `src/`
--   **Coverage thresholds**: 80% floor for `branches`, `functions`, `lines`, `statements` — see `coverageThreshold` in `jest.config.js` for per-path entries
+-   **Coverage configuration**: see `coverageThreshold` in `jest.config.js` when running coverage checks
 -   **Coverage exclusions**: `src/__test_utils__/**`, `src/__mocks__/**`, `src/**/index.ts`
 -   **Reports**: `coverage/lcov-report/index.html` for detailed HTML report

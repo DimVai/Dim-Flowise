@@ -118,8 +118,6 @@ Full integration with a running Flowise instance. Requires `VITE_FLOW_ID` for th
 -   Test Run via `POST /api/v1/internal-prediction` with markdown-rendered response (disabled when flow has validation errors)
 -   Run Status panel showing per-node execution results (manual refresh)
 
-> **Community fork limitation:** Stored API-key permissions are not currently enforced by the route permission middleware. Do not assume that a read-only key prevents this example from saving, renaming, or deleting data. See [Authentication](../../../CONFIGURATION.md#authentication).
-
 ### Additional Examples
 
 | Example                 | File                            | Description                                                                              |

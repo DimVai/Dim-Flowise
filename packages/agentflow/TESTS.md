@@ -10,23 +10,23 @@ pnpm test:watch        # Watch mode during development
 
 ## Test Strategy
 
-Tests are prioritized by impact. When modifying a file, add or update tests in the same PR.
+Tests can be selected according to the scope and risk of each change. The commands above are available for manual use when verification is needed.
 
-### Tier 1 — Core Logic (must test)
+### Tier 1 — Core Logic
 
-Pure business logic in `core/`, `infrastructure/`, and critical hooks. These carry the highest risk — a bug here affects every user. Always test in the same PR when modifying.
+Pure business logic in `core/`, `infrastructure/`, and critical hooks. These are useful candidates for focused tests when their behavior changes.
 
 **What belongs here:** validation rules, node utilities, API clients, state management (reducers, context actions), flow data hooks (`useFlowHandlers`).
 
-### Tier 2 — Feature Hooks & Dialogs (test when changing)
+### Tier 2 — Feature Hooks & Dialogs
 
-Feature-level hooks and dialog components that orchestrate UI behavior. Test when adding features or fixing bugs.
+Feature-level hooks and dialog components that orchestrate UI behavior may benefit from focused tests when their behavior changes.
 
 **What belongs here:** search logic, drag-and-drop, node color calculations, dialog state machines, theme detection.
 
-### Tier 3 — UI Components (test if logic exists)
+### Tier 3 — UI Components
 
-Presentational components that are mostly JSX. Only add tests if the component contains meaningful business logic (e.g., an exported helper function). Pure styling components (`styled.ts`, `MainCard.tsx`, etc.) do not need tests.
+Presentational components that are mostly JSX can be checked manually or with focused tests when their behavior warrants it. Pure styling components (`styled.ts`, `MainCard.tsx`, etc.) usually do not need tests.
 
 ## Writing Tests
 
@@ -109,7 +109,6 @@ jest.mock('@/infrastructure/store', () => ({
 
 -   **Jest config**: `jest.config.js` — two projects: `unit` (node env, `.test.ts`) and `components` (custom jsdom env, `.test.tsx`)
 -   **Import aliases**: `@test-utils` maps to `src/__test_utils__`, `@/` maps to `src/`
--   **Coverage thresholds**: 80% floor for `branches`, `functions`, `lines`, `statements` — see `coverageThreshold` in `jest.config.js` for per-path entries
+-   **Coverage configuration**: see `coverageThreshold` in `jest.config.js` when running coverage checks
 -   **Coverage exclusions**: `src/__test_utils__/**`, `src/__mocks__/**`
--   **CI**: `pnpm test:coverage` runs in GitHub Actions between lint and build
 -   **Reports**: `coverage/lcov-report/index.html` for detailed HTML report

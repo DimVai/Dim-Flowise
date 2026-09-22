@@ -2,7 +2,7 @@
 
 This file records changes made by this fork relative to the upstream baseline, `flowise@3.1.4` at commit [`a65f81bb43ef66d3ce734bf0dff4223ae8041c95`](https://github.com/flowiseai/flowise/commit/a65f81bb43ef66d3ce734bf0dff4223ae8041c95). Earlier upstream history remains in Git and the original project's release history.
 
-Changes are collected under **Unreleased** until this fork adopts its own release versioning. Entries describe user-visible behavior, operational impact, and required action; configuration details live in [CONFIGURATION.md](CONFIGURATION.md). Imported fixes should identify the source commit and any adaptations.
+This fork has its own version numbering, beginning with `1.0`; the current value is stored in `forkVersion` in `packages/server/package.json`. Changes not assigned to a published version are collected under **Unreleased**. Entries describe user-visible behavior, operational impact, and required action; configuration details live in [CONFIGURATION.md](CONFIGURATION.md). Imported fixes should identify the source commit and any adaptations.
 
 ## Unreleased
 
@@ -47,7 +47,7 @@ Changes are collected under **Unreleased** until this fork adopts its own releas
 
 -   Clarify that `pnpm start` serves the compiled UI and document rebuilding UI-only changes before restarting.
 
--   Identify the public repository as `DimVai/Dim-Flowise` and establish the private email contact for security and conduct reports.
+-   Identify the public repository as `DimVai/Dim-Flowise` and clarify that this personal fork does not accept external security or conduct reports.
 
 -   Clarify the README's distinction between the fork's primary objectives and the supporting changes that arose during their implementation.
 
@@ -55,6 +55,7 @@ Changes are collected under **Unreleased** until this fork adopts its own releas
 
 ### Removed
 
+-   The inherited Code of Conduct and its external incident-reporting process. This personal fork does not accept conduct or vulnerability reports.
 -   The upstream Flowise sunset announcement banner, including its dismissal state and reserved layout space.
 
 -   The 125 commercial-licensed files under `packages/server/src/enterprise/` and `packages/server/src/IdentityManager.ts`, together with dependent imports, routes, UI entries, license flags, and unused dependencies.

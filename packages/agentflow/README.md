@@ -10,7 +10,7 @@ This package is part of the [community fork](../../README.md). Its package name 
 
 The upstream package is a development SDK; see the local `package.json` for its version. This is not a release version for the community fork.
 
-This package is functional and has comprehensive test coverage, but the public API may still change before a stable release. It is suitable for early integration and testing but not yet recommended for production use.
+This package is functional and used in production in this fork. Its public API may still change as the fork evolves.
 
 **What works today:**
 

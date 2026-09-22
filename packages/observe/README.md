@@ -6,17 +6,9 @@ This package is part of the [community fork](../../README.md). Its package name 
 
 > Embeddable React components for visualizing AI agent executions and their runtime details
 
-## Inherited development status
+## Status in this fork
 
-**The upstream package was documented as a development SDK.** Its inherited limitations are listed below; they do not constitute a new verification of this fork.
-
--   🚧 Components are not yet fully functional
--   ❌ End-to-end functionality is not complete
--   🔄 Feature implementation and testing remain incomplete
--   ⚡ APIs may change before stable release
--   📝 The component documentation is retained from the upstream baseline, with fork-specific setup notes
-
-**Cannot be used in production. For development and testing purposes only.**
+This package is functional and used in production in this fork. Its public API may change as the fork evolves. The component documentation below is retained from the upstream baseline, with fork-specific setup notes.
 
 ## Overview
 
