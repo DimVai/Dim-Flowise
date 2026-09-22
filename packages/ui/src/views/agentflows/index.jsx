@@ -324,8 +324,8 @@ const Agentflows = () => {
                                 }}
                             />
                             <Box sx={{ flex: 1 }}>
-                                <strong>V1 Agentflows are deprecated.</strong> We recommend migrating to V2 for improved performance and
-                                continued support.
+                                <strong>V1 Agentflows are deprecated.</strong> This functionality remains here only for backward
+                                compatibility.
                             </Box>
                             <IconButton
                                 aria-label='dismiss'

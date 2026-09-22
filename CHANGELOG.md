@@ -8,6 +8,8 @@ This fork has its own version numbering, beginning with `1.0`; the current value
 
 ### Fixed
 
+-   Preserve HTTP error statuses from prediction execution, so missing or invalid flow API keys return 401 instead of 500.
+
 -   Add explicit Express handler types to the API-key middleware exports to resolve TypeScript declaration build errors (TS2742).
 
 -   Restore the `/account` page in the main layout with guidance for environment-configured owner credentials.
