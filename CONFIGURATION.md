@@ -4,6 +4,12 @@ This is the configuration reference for the community fork. Set server variables
 
 Keep actual passwords, tokens, and keys out of Git. The examples below contain placeholders; replace them before starting the application.
 
+## Chatflow node visibility
+
+`SHOW_DEPRECATING_NODES` defaults to `false`. Set it to exactly `true` to show nodes marked `DEPRECATING` in the chatflow Add Nodes menu. Restart the server and refresh the browser after changing it; no UI rebuild is needed.
+
+By default, these choices and categories containing only these choices remain mounted but are hidden with the shared `display-none` CSS class. Existing flows, saved nodes, and node execution are unchanged. Agentflow menus are unchanged. If the UI cannot load the setting, the choices remain hidden.
+
 ## Authentication
 
 | Variable               | Required | Default | Meaning                                                                                                    |

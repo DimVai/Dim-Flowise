@@ -33,6 +33,8 @@ This fork has its own version numbering, beginning with `1.0`; the current value
 
 ### Changed
 
+-   Hide `DEPRECATING` chatflow node choices by default with a shared `display-none` CSS utility. Set `SHOW_DEPRECATING_NODES=true` to show them again; existing flows and node execution are preserved.
+
 -   Hide the upstream GitHub star badge in the header while retaining its component.
 -   Move the optional root Dockerfile to `.github/Dockerfile` so Railway can select Railpack for pnpm deployments, update the manual ECR workflow to use its new path, and remove the automatic Docker-build and upstream-only proprietary-path workflows.
 

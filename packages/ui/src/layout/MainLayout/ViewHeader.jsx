@@ -26,6 +26,7 @@ const ViewHeader = ({
     title,
     description,
     isBackButton,
+    backButtonClassName,
     onBack,
     isEditButton,
     onEdit
@@ -47,7 +48,15 @@ const ViewHeader = ({
             >
                 <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'row' }}>
                     {isBackButton && (
-                        <StyledFab sx={{ mr: 3 }} size='small' color='secondary' aria-label='back' title='Back' onClick={onBack}>
+                        <StyledFab
+                            className={backButtonClassName}
+                            sx={{ mr: 3 }}
+                            size='small'
+                            color='secondary'
+                            aria-label='back'
+                            title='Back'
+                            onClick={onBack}
+                        >
                             <IconArrowLeft />
                         </StyledFab>
                     )}
@@ -144,6 +153,7 @@ ViewHeader.propTypes = {
     title: PropTypes.string,
     description: PropTypes.string,
     isBackButton: PropTypes.bool,
+    backButtonClassName: PropTypes.string,
     onBack: PropTypes.func,
     isEditButton: PropTypes.bool,
     onEdit: PropTypes.func

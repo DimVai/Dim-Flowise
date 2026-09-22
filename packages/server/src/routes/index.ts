@@ -52,6 +52,7 @@ import variablesRouter from './variables'
 import vectorRouter from './vectors'
 import verifyRouter from './verify'
 import versionRouter from './versions'
+import uiConfigRouter from './ui-config'
 import webhookRouter from './webhook'
 import webhookListenerRouter from './webhook-listener'
 
@@ -104,6 +105,7 @@ router.use('/verify', verifyRouter)
 router.use('/webhook', webhookRouter)
 router.use('/webhook-listener', webhookListenerRouter)
 router.use('/version', versionRouter)
+router.use('/ui-config', uiConfigRouter)
 router.use('/upsert-history', upsertHistoryRouter)
 router.use('/settings', settingsRouter)
 router.use('/nvidia-nim', nvidiaNimRouter)

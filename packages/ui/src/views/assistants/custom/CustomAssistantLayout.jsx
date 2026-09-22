@@ -93,9 +93,10 @@ const CustomAssistantLayout = () => {
                 {error ? (
                     <ErrorBoundary error={error} />
                 ) : (
-                    <Stack flexDirection='column' sx={{ gap: 3, '& .MuiFab-root[aria-label="back"]': { display: 'none' } }}>
+                    <Stack flexDirection='column' sx={{ gap: 3 }}>
                         <ViewHeader
                             isBackButton={true}
+                            backButtonClassName='display-none'
                             onSearchChange={onSearchChange}
                             search={true}
                             searchPlaceholder='Search Assistants'

@@ -4,6 +4,11 @@
 // third-party
 @import 'react-perfect-scrollbar/dist/css/styles.css';
 
+// Shared visibility utility; override component display styles.
+.display-none {
+    display: none !important;
+}
+
 // ==============================|| LIGHT BOX ||============================== //
 .fullscreen .react-images__blanket {
     z-index: 1200;

@@ -36,6 +36,7 @@ import MainCard from '@/ui-component/cards/MainCard'
 import Transitions from '@/ui-component/extended/Transitions'
 import { StyledFab } from '@/ui-component/button/StyledFab'
 import AgentflowGeneratorDialog from '@/ui-component/dialog/AgentflowGeneratorDialog'
+import apiClient from '@/api/client'
 
 // icons
 import { IconPlus, IconSearch, IconMinus, IconX, IconSparkles } from '@tabler/icons-react'
@@ -74,6 +75,24 @@ const AddNodes = ({ nodesData, node, isAgentCanvas, isAgentflowv2, onFlowGenerat
     const theme = useTheme()
     const customization = useSelector((state) => state.customization)
     const dispatch = useDispatch()
+
+    const [showDeprecatingNodes, setShowDeprecatingNodes] = useState(false)
+    const hideDeprecatingNodes = !isAgentCanvas && !isAgentflowv2 && !showDeprecatingNodes
+
+    useEffect(() => {
+        let active = true
+        apiClient
+            .get('/ui-config')
+            .then(({ data }) => {
+                if (active) setShowDeprecatingNodes(data.showDeprecatingNodes === true)
+            })
+            .catch(() => {
+                // Keep deprecated choices hidden when configuration is unavailable.
+            })
+        return () => {
+            active = false
+        }
+    }, [])
 
     const [searchValue, setSearchValue] = useState('')
     const [nodes, setNodes] = useState({})
@@ -611,6 +630,13 @@ const AddNodes = ({ nodesData, node, isAgentCanvas, isAgentflowv2, onFlowGenerat
                                                     .sort()
                                                     .map((category) => (
                                                         <Accordion
+                                                            className={
+                                                                hideDeprecatingNodes &&
+                                                                (category.split(';')[1] === 'DEPRECATING' ||
+                                                                    nodes[category].every((node) => node.badge === 'DEPRECATING'))
+                                                                    ? 'display-none'
+                                                                    : undefined
+                                                            }
                                                             expanded={categoryExpanded[category] || false}
                                                             onChange={handleAccordionChange(category)}
                                                             key={category}
@@ -657,6 +683,11 @@ const AddNodes = ({ nodesData, node, isAgentCanvas, isAgentflowv2, onFlowGenerat
                                                                 {nodes[category].map((node, index) => (
                                                                     <div
                                                                         key={node.name}
+                                                                        className={
+                                                                            hideDeprecatingNodes && node.badge === 'DEPRECATING'
+                                                                                ? 'display-none'
+                                                                                : undefined
+                                                                        }
                                                                         onDragStart={(event) => onDragStart(event, node)}
                                                                         draggable
                                                                     >
