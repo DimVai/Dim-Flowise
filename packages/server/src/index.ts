@@ -302,18 +302,15 @@ export class App {
 let serverApp: App | undefined
 
 export async function start(): Promise<void> {
-    // Start catalog initialization alongside server setup, but finish it before listening.
-    const modelCatalogInitialization = initializeModelCatalog(logger)
-
     serverApp = new App()
 
     const host = process.env.HOST
     const port = parseInt(process.env.PORT || '', 10) || 3000
     const server = http.createServer(serverApp.app)
 
+    await initializeModelCatalog(logger)
     await serverApp.initDatabase()
     await serverApp.config()
-    await modelCatalogInitialization
 
     server.listen(port, host, () => {
         logger.info(`⚡️ [server]: Flowise Server is listening at ${host ? 'http://' + host : ''}:${port}`)

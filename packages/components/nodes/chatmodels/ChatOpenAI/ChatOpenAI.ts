@@ -4,6 +4,7 @@ import { ICommonObject, IMultiModalOption, INode, INodeData, INodeOptionsValue, 
 import { getBaseClasses, getCredentialData, getCredentialParam, isReasoningModelOpenAI } from '../../../src/utils'
 import { ChatOpenAI } from './FlowiseChatOpenAI'
 import { getModels, MODEL_TYPE } from '../../../src/modelLoader'
+import { getDefaultModelFor } from '../../../src/defaultChatModel'
 import { OpenAI as OpenAIClient } from 'openai'
 
 class ChatOpenAI_ChatModels implements INode {
@@ -45,7 +46,7 @@ class ChatOpenAI_ChatModels implements INode {
                 name: 'modelName',
                 type: 'asyncOptions',
                 loadMethod: 'listModels',
-                default: 'gpt-4o-mini'
+                default: getDefaultModelFor('openai')
             },
             {
                 label: 'Temperature',

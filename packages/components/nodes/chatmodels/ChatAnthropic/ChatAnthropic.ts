@@ -5,6 +5,7 @@ import { ICommonObject, IMultiModalOption, INode, INodeData, INodeOptionsValue, 
 import { getBaseClasses, getCredentialData, getCredentialParam } from '../../../src/utils'
 import { ChatAnthropic } from './FlowiseChatAnthropic'
 import { getModels, MODEL_TYPE } from '../../../src/modelLoader'
+import { getDefaultModelFor } from '../../../src/defaultChatModel'
 import { supportsSamplingParams } from '../../../src/anthropicUtils'
 
 class ChatAnthropic_ChatModels implements INode {
@@ -46,7 +47,7 @@ class ChatAnthropic_ChatModels implements INode {
                 name: 'modelName',
                 type: 'asyncOptions',
                 loadMethod: 'listModels',
-                default: 'claude-haiku-4-5'
+                default: getDefaultModelFor('anthropic')
             },
             {
                 label: 'Temperature',
