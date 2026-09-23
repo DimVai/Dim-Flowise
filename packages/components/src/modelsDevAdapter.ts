@@ -31,7 +31,7 @@ const sortByReleaseDateDescending = (models: ModelsDevModel[]): ModelsDevModel[]
 
 const convertCostPerMillionToPerToken = (value: unknown): number => {
     if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) return 0
-    return value / 1_000_000
+    return Number((value / 1_000_000).toFixed(8))
 }
 
 const convertToFlowiseChatOption = (model: ModelsDevModel): ModelsDevChatOption => {
