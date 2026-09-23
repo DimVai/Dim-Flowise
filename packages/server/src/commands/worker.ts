@@ -21,7 +21,7 @@ export default class Worker extends BaseCommand {
 
     async run(): Promise<void> {
         logger.info('Starting Flowise Worker...')
-        void initializeModelCatalog()
+        void initializeModelCatalog(logger)
 
         const { appDataSource, telemetry, componentNodes, cachePool, abortControllerPool, usageCacheManager } = await this.prepareData()
 

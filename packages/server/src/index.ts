@@ -303,7 +303,7 @@ let serverApp: App | undefined
 
 export async function start(): Promise<void> {
     // Load the bundled catalog now; configured remote sources must not delay startup.
-    void initializeModelCatalog()
+    void initializeModelCatalog(logger)
 
     serverApp = new App()
 

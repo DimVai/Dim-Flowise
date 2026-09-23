@@ -8,6 +8,8 @@ This fork has its own version numbering, beginning with `1.0`; the current value
 
 ### Changed
 
+-   Normalize missing or invalid dynamic model prices to zero for compatibility with existing Flowise cost calculations. Route catalog messages through the shared server/worker logger with the `[model-catalog]` prefix and combine provider counts into one startup summary.
+
 -   Use the bundled model catalog by default instead of fetching the upstream catalog. Preserve `MODEL_LIST_CONFIG_JSON` file/HTTP(S) overrides and bundled fallback on loading failure.
 -   Share an in-memory model catalog across model lists, region lists, and cost lookups. Initialization runs once per process; source changes require a process restart.
 -   Initialize the bundled catalog at server startup while a configured catalog override loads in the background without delaying startup.

@@ -33,6 +33,14 @@ const isValidUrl = (urlString: string) => {
 
 type ModelCatalog = Record<MODEL_TYPE, any[]>
 
+export interface ModelCatalogLogger {
+    info(message: string): void
+    warn(message: string): void
+}
+
+// The server/worker supplies its shared logger; standalone component consumers can use console.
+let catalogLogger: ModelCatalogLogger = console
+
 const isModelCatalog = (value: unknown): value is ModelCatalog => {
     if (!value || typeof value !== 'object' || Array.isArray(value)) return false
     const catalog = value as Record<string, unknown>
@@ -63,10 +71,10 @@ const loadConfiguredBase = async (modelFile: string): Promise<void> => {
         }
         if (!isModelCatalog(models)) throw new Error('Invalid model catalog')
         modelCatalog = models
-        console.info('[model-catalog] Configured base loaded.')
+        catalogLogger.info('[model-catalog] Configured base loaded.')
     } catch {
         // Do not log source URLs or errors that may contain credentials.
-        console.warn('[model-catalog] Configured base could not be loaded; keeping bundled catalog.')
+        catalogLogger.warn('[model-catalog] Configured base could not be loaded; keeping bundled catalog.')
     }
 }
 
@@ -82,12 +90,13 @@ const ensureBaseCatalog = (): Promise<void> => {
 }
 
 /** Initialize once at startup without blocking readers on either remote source. */
-export const initializeModelCatalog = (): Promise<void> => {
+export const initializeModelCatalog = (logger?: ModelCatalogLogger): Promise<void> => {
+    if (logger) catalogLogger = logger
     if (modelCatalogInitialization) return modelCatalogInitialization
 
     modelCatalogInitialization = ensureBaseCatalog().then(() => {
         if (String(process.env.DISABLE_DYNAMIC_MODELS).toLowerCase() === 'true') {
-            console.info('[model-catalog] Models.dev startup refresh disabled.')
+            catalogLogger.info('[model-catalog] Models.dev startup refresh disabled.')
             return
         }
         return refreshModelCatalog()
@@ -112,13 +121,25 @@ export const refreshModelCatalog = (): Promise<void> => {
             for (const [name, models] of replacements) chat.push({ name, models })
             modelCatalog = { ...modelCatalog, chat }
 
-            for (const name of ['chatOpenAI', 'chatAnthropic', 'chatGoogleGenerativeAI'] as const) {
+            const loaded: string[] = []
+            const retained: string[] = []
+            const providers = [
+                ['chatOpenAI', 'OpenAI'],
+                ['chatAnthropic', 'Anthropic'],
+                ['chatGoogleGenerativeAI', 'Google']
+            ] as const
+            for (const [name, label] of providers) {
                 const models = lists[name]
-                if (models) console.info(`[model-catalog] ${name}: loaded ${models.length} models from Models.dev.`)
-                else console.warn(`[model-catalog] ${name}: no usable Models.dev list; keeping existing list.`)
+                if (models) loaded.push(`${label} (${models.length} models)`)
+                else retained.push(label)
             }
+            if (loaded.length) catalogLogger.info(`[model-catalog] Dynamic Models loaded from models.dev: ${loaded.join(', ')}`)
+            if (retained.length)
+                catalogLogger.warn(
+                    `[model-catalog] Dynamic Models: no usable models.dev list for ${retained.join(', ')}; keeping existing lists.`
+                )
         } catch {
-            console.warn('[model-catalog] Models.dev refresh failed; keeping existing catalog.')
+            catalogLogger.warn('[model-catalog] Models.dev refresh failed; keeping existing catalog.')
         }
     })().finally(() => {
         catalogRefresh = undefined

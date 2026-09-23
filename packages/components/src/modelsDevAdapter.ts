@@ -2,8 +2,8 @@ import type { INodeOptionsValue } from './Interface'
 import type { ModelsDevModel } from './modelsDevFilters'
 
 export interface ModelsDevChatOption extends INodeOptionsValue {
-    input_cost?: number
-    output_cost?: number
+    input_cost: number
+    output_cost: number
 }
 
 const getReleaseTimestamp = (value: unknown): number | undefined => {
@@ -29,15 +29,18 @@ const sortByReleaseDateDescending = (models: ModelsDevModel[]): ModelsDevModel[]
         .map(({ model }) => model)
 }
 
-const convertCostPerMillionToPerToken = (value: unknown): number | undefined => {
-    if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) return undefined
+const convertCostPerMillionToPerToken = (value: unknown): number => {
+    if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) return 0
     return value / 1_000_000
 }
 
 const convertToFlowiseChatOption = (model: ModelsDevModel): ModelsDevChatOption => {
     const option: ModelsDevChatOption = {
         name: model.id,
-        label: typeof model.name === 'string' && model.name.trim() ? model.name : model.id
+        label: typeof model.name === 'string' && model.name.trim() ? model.name : model.id,
+        // Match the existing Flowise cost consumers: missing or invalid prices become zero.
+        input_cost: 0,
+        output_cost: 0
     }
 
     if (typeof model.description === 'string' && model.description.trim()) {
@@ -46,11 +49,8 @@ const convertToFlowiseChatOption = (model: ModelsDevModel): ModelsDevChatOption 
 
     if (model.cost && typeof model.cost === 'object' && !Array.isArray(model.cost)) {
         const cost = model.cost as Record<string, unknown>
-        const inputCost = convertCostPerMillionToPerToken(cost.input)
-        const outputCost = convertCostPerMillionToPerToken(cost.output)
-        // Omit unknown prices; an explicit zero from the source is a valid price.
-        if (inputCost !== undefined) option.input_cost = inputCost
-        if (outputCost !== undefined) option.output_cost = outputCost
+        option.input_cost = convertCostPerMillionToPerToken(cost.input)
+        option.output_cost = convertCostPerMillionToPerToken(cost.output)
     }
 
     return option
