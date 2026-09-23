@@ -6,6 +6,14 @@ This fork has its own version numbering, beginning with `1.0`; the current value
 
 ## Unreleased
 
+### Changed
+
+-   Use the bundled model catalog by default instead of fetching the upstream catalog. Preserve `MODEL_LIST_CONFIG_JSON` file/HTTP(S) overrides and bundled fallback on loading failure.
+-   Share an in-memory model catalog across model lists, region lists, and cost lookups. Initialization runs once per process; source changes require a process restart.
+-   Initialize the bundled catalog at server startup while a configured catalog override loads in the background without delaying startup.
+-   Apply a 10-second timeout to HTTP(S) model catalog overrides, falling back to the bundled catalog on timeout.
+-   Refresh the basic OpenAI, Anthropic, and Google Gemini chat lists from Models.dev once at server/worker startup, with per-provider fallback and `DISABLE_DYNAMIC_MODELS` opt-out. Filter unsuitable entries and order accepted models by release date without changing saved flows or the source catalog. See [Model catalog](CONFIGURATION.md#model-catalog).
+
 ### Fixed
 
 -   Preserve HTTP error statuses from prediction execution, so missing or invalid flow API keys return 401 instead of 500.
@@ -27,7 +35,7 @@ This fork has its own version numbering, beginning with `1.0`; the current value
 -   Display the Dim-Flowise version below the installed Flowise version in About, sourced from `forkVersion` in `packages/server/package.json` (initial value `1.2`). Installed versions remain available if the upstream release lookup fails.
 
 -   Single-user authentication using required `FLOWISE_USERNAME`, `FLOWISE_PASSWORD`, and `FLOWISE_SECRET` environment variables, with a signed `HttpOnly` login cookie and login rate limiting.
--   Configurable token and cookie lifetime through `FLOWISE_JTW_DURATION` (default `24h`).
+-   Configurable token and cookie lifetime through `FLOWISE_JWΤ_DURATION` (default `24h`).
 -   Community migrations that normalize workspace-scoped records to workspace `"0"` and remove dependencies on commercial workspace entities.
 -   English documentation for this fork, including a configuration reference, explicit contribution policy, and acknowledgment of the original Flowise project.
 

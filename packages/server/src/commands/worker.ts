@@ -1,4 +1,5 @@
 import logger from '../utils/logger'
+import { initializeModelCatalog } from 'flowise-components'
 import { QueueManager } from '../queue/QueueManager'
 import { BaseCommand } from './base'
 import { getDataSource } from '../DataSource'
@@ -20,6 +21,7 @@ export default class Worker extends BaseCommand {
 
     async run(): Promise<void> {
         logger.info('Starting Flowise Worker...')
+        void initializeModelCatalog()
 
         const { appDataSource, telemetry, componentNodes, cachePool, abortControllerPool, usageCacheManager } = await this.prepareData()
 

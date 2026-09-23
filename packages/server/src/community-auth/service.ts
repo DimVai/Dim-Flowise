@@ -31,14 +31,14 @@ const getRequiredEnvironmentValue = (name: 'FLOWISE_USERNAME' | 'FLOWISE_PASSWOR
 const parseTokenDurationSeconds = (value: string): number => {
     const match = value.trim().match(/^(\d+(?:\.\d+)?)(ms|s|m|h|d|w|M|Q|y)$/)
     if (!match) {
-        throw new Error('FLOWISE_JTW_DURATION must use Moment.js duration notation, for example 24h or 3d')
+        throw new Error('FLOWISE_JWΤ_DURATION must use Moment.js duration notation, for example 24h or 3d')
     }
 
     const amount = Number(match[1])
     const unit = match[2] as moment.unitOfTime.DurationConstructor
     const seconds = Math.floor(moment.duration(amount, unit).asSeconds())
     if (!Number.isSafeInteger(seconds) || seconds < 1) {
-        throw new Error('FLOWISE_JTW_DURATION must represent a positive duration of at least 1 second')
+        throw new Error('FLOWISE_JWΤ_DURATION must represent a positive duration of at least 1 second')
     }
 
     return seconds
@@ -49,7 +49,7 @@ export const getCommunityAuthConfig = (): CommunityAuthConfig => {
         username: getRequiredEnvironmentValue('FLOWISE_USERNAME'),
         password: getRequiredEnvironmentValue('FLOWISE_PASSWORD'),
         secret: getRequiredEnvironmentValue('FLOWISE_SECRET'),
-        tokenDurationSeconds: parseTokenDurationSeconds(process.env.FLOWISE_JTW_DURATION || COMMUNITY_AUTH_DEFAULT_TOKEN_DURATION)
+        tokenDurationSeconds: parseTokenDurationSeconds(process.env.FLOWISE_JWΤ_DURATION || COMMUNITY_AUTH_DEFAULT_TOKEN_DURATION)
     }
 
     if (config.secret.length < 32) throw new Error('FLOWISE_SECRET must contain at least 32 characters')

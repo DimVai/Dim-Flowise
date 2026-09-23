@@ -7,7 +7,7 @@ import {
     verifyCommunityAuthToken
 } from './service'
 
-const ENVIRONMENT_VARIABLES = ['FLOWISE_USERNAME', 'FLOWISE_PASSWORD', 'FLOWISE_SECRET', 'FLOWISE_JTW_DURATION'] as const
+const ENVIRONMENT_VARIABLES = ['FLOWISE_USERNAME', 'FLOWISE_PASSWORD', 'FLOWISE_SECRET', 'FLOWISE_JWΤ_DURATION'] as const
 const originalEnvironment = Object.fromEntries(ENVIRONMENT_VARIABLES.map((name) => [name, process.env[name]]))
 
 const restoreEnvironment = (): void => {
@@ -23,7 +23,7 @@ describe('community authentication service', () => {
         process.env.FLOWISE_USERNAME = 'community-user'
         process.env.FLOWISE_PASSWORD = ' password with spaces '
         process.env.FLOWISE_SECRET = 'test-only-secret-with-at-least-32-characters'
-        process.env.FLOWISE_JTW_DURATION = '24h'
+        process.env.FLOWISE_JWΤ_DURATION = '24h'
     })
 
     afterAll(restoreEnvironment)
@@ -72,19 +72,19 @@ describe('community authentication service', () => {
         expect(() => getCommunityAuthConfig()).toThrow('FLOWISE_SECRET must contain at least 32 characters')
     })
 
-    it('uses FLOWISE_JTW_DURATION for both the token and cookie lifetime', () => {
-        process.env.FLOWISE_JTW_DURATION = '3d'
+    it('uses FLOWISE_JWΤ_DURATION for both the token and cookie lifetime', () => {
+        process.env.FLOWISE_JWΤ_DURATION = '3d'
 
         const decodedToken = jwt.decode(createCommunityAuthToken()) as JwtPayload
         expect(decodedToken.exp! - decodedToken.iat!).toBe(3 * 24 * 60 * 60)
         expect(getCommunityAuthCookieOptions().maxAge).toBe(3 * 24 * 60 * 60 * 1000)
     })
 
-    it('rejects invalid or sub-second FLOWISE_JTW_DURATION values', () => {
-        process.env.FLOWISE_JTW_DURATION = 'three days'
-        expect(() => getCommunityAuthConfig()).toThrow('FLOWISE_JTW_DURATION must use Moment.js duration notation')
+    it('rejects invalid or sub-second FLOWISE_JWΤ_DURATION values', () => {
+        process.env.FLOWISE_JWΤ_DURATION = 'three days'
+        expect(() => getCommunityAuthConfig()).toThrow('FLOWISE_JWΤ_DURATION must use Moment.js duration notation')
 
-        process.env.FLOWISE_JTW_DURATION = '500ms'
-        expect(() => getCommunityAuthConfig()).toThrow('FLOWISE_JTW_DURATION must represent a positive duration of at least 1 second')
+        process.env.FLOWISE_JWΤ_DURATION = '500ms'
+        expect(() => getCommunityAuthConfig()).toThrow('FLOWISE_JWΤ_DURATION must represent a positive duration of at least 1 second')
     })
 })

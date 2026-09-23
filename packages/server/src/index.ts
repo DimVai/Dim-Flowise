@@ -2,6 +2,7 @@ import { ExpressAdapter } from '@bull-board/express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import express, { Request, Response } from 'express'
+import { initializeModelCatalog } from 'flowise-components'
 import 'global-agent/bootstrap'
 import http from 'http'
 import path from 'path'
@@ -301,6 +302,9 @@ export class App {
 let serverApp: App | undefined
 
 export async function start(): Promise<void> {
+    // Load the bundled catalog now; configured remote sources must not delay startup.
+    void initializeModelCatalog()
+
     serverApp = new App()
 
     const host = process.env.HOST

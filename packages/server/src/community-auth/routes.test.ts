@@ -4,7 +4,7 @@ import express from 'express'
 import request from 'supertest'
 import communityAuthRouter from './routes'
 
-const ENVIRONMENT_VARIABLES = ['FLOWISE_USERNAME', 'FLOWISE_PASSWORD', 'FLOWISE_SECRET', 'FLOWISE_JTW_DURATION'] as const
+const ENVIRONMENT_VARIABLES = ['FLOWISE_USERNAME', 'FLOWISE_PASSWORD', 'FLOWISE_SECRET', 'FLOWISE_JWΤ_DURATION'] as const
 const originalEnvironment = Object.fromEntries(ENVIRONMENT_VARIABLES.map((name) => [name, process.env[name]]))
 
 const restoreEnvironment = (): void => {
@@ -29,7 +29,7 @@ describe('community authentication routes', () => {
         process.env.FLOWISE_USERNAME = 'community-user'
         process.env.FLOWISE_PASSWORD = 'community-password'
         process.env.FLOWISE_SECRET = 'test-only-secret-with-at-least-32-characters'
-        process.env.FLOWISE_JTW_DURATION = '24h'
+        process.env.FLOWISE_JWΤ_DURATION = '24h'
     })
 
     afterAll(restoreEnvironment)

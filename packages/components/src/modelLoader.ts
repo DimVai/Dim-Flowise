@@ -2,6 +2,8 @@ import axios from 'axios'
 import * as fs from 'fs'
 import * as path from 'path'
 import { INodeOptionsValue } from './Interface'
+import { MODEL_CATALOG_TIMEOUT_MS } from './modelCatalogConstants'
+import { fetchModelsDevChatLists } from './modelsDevCatalog'
 
 export enum MODEL_TYPE {
     CHAT = 'chat',
@@ -29,35 +31,105 @@ const isValidUrl = (urlString: string) => {
     return url.protocol === 'http:' || url.protocol === 'https:'
 }
 
-/**
- * Load the raw model file from either a URL or a local file
- * If any of the loading fails, fallback to the default models.json file on disk
- */
-const getRawModelFile = async () => {
-    const modelFile =
-        process.env.MODEL_LIST_CONFIG_JSON ?? 'https://raw.githubusercontent.com/FlowiseAI/Flowise/main/packages/components/models.json'
+type ModelCatalog = Record<MODEL_TYPE, any[]>
+
+const isModelCatalog = (value: unknown): value is ModelCatalog => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+    const catalog = value as Record<string, unknown>
+    return Object.values(MODEL_TYPE).every((category) => {
+        const groups = catalog[category]
+        return (
+            Array.isArray(groups) &&
+            groups.every((group) => group && typeof group === 'object' && typeof group.name === 'string' && Array.isArray(group.models))
+        )
+    })
+}
+
+let modelCatalog: ModelCatalog
+let baseCatalogInitialization: Promise<void> | undefined
+let modelCatalogInitialization: Promise<void> | undefined
+let catalogRefresh: Promise<void> | undefined
+
+/** A configured source replaces the base only after a complete, usable catalog is loaded. */
+const loadConfiguredBase = async (modelFile: string): Promise<void> => {
     try {
+        let models: unknown
         if (isValidUrl(modelFile)) {
-            const resp = await axios.get(modelFile)
-            if (resp.status === 200 && resp.data) {
-                return resp.data
-            } else {
-                throw new Error('Error fetching model list')
-            }
-        } else if (fs.existsSync(modelFile)) {
-            const models = await fs.promises.readFile(modelFile, 'utf8')
-            if (models) {
-                return JSON.parse(models)
-            }
+            const resp = await axios.get(modelFile, { timeout: MODEL_CATALOG_TIMEOUT_MS })
+            if (resp.status !== 200) throw new Error('Error fetching model list')
+            models = resp.data
+        } else {
+            models = JSON.parse(await fs.promises.readFile(modelFile, 'utf8'))
         }
-        throw new Error('Model file does not exist or is empty')
-    } catch (e) {
-        const models = await fs.promises.readFile(getModelsJSONPath(), 'utf8')
-        if (models) {
-            return JSON.parse(models)
-        }
-        return {}
+        if (!isModelCatalog(models)) throw new Error('Invalid model catalog')
+        modelCatalog = models
+        console.info('[model-catalog] Configured base loaded.')
+    } catch {
+        // Do not log source URLs or errors that may contain credentials.
+        console.warn('[model-catalog] Configured base could not be loaded; keeping bundled catalog.')
     }
+}
+
+const ensureBaseCatalog = (): Promise<void> => {
+    if (baseCatalogInitialization) return baseCatalogInitialization
+
+    const bundled: unknown = JSON.parse(fs.readFileSync(getModelsJSONPath(), 'utf8'))
+    if (!isModelCatalog(bundled)) throw new Error('Invalid bundled model catalog')
+    modelCatalog = bundled
+    const configuredSource = process.env.MODEL_LIST_CONFIG_JSON
+    baseCatalogInitialization = configuredSource !== undefined ? loadConfiguredBase(configuredSource) : Promise.resolve()
+    return baseCatalogInitialization
+}
+
+/** Initialize once at startup without blocking readers on either remote source. */
+export const initializeModelCatalog = (): Promise<void> => {
+    if (modelCatalogInitialization) return modelCatalogInitialization
+
+    modelCatalogInitialization = ensureBaseCatalog().then(() => {
+        if (String(process.env.DISABLE_DYNAMIC_MODELS).toLowerCase() === 'true') {
+            console.info('[model-catalog] Models.dev startup refresh disabled.')
+            return
+        }
+        return refreshModelCatalog()
+    })
+    return modelCatalogInitialization
+}
+
+/** Refresh only the catalog; reusable by a future explicit refresh action. */
+export const refreshModelCatalog = (): Promise<void> => {
+    if (catalogRefresh) return catalogRefresh
+    catalogRefresh = (async () => {
+        try {
+            await ensureBaseCatalog()
+            const lists = await fetchModelsDevChatLists()
+            const replacements = new Map(Object.entries(lists))
+            const chat = modelCatalog.chat.map((group) => {
+                const models = replacements.get(group.name)
+                if (!models) return group
+                replacements.delete(group.name)
+                return { ...group, models }
+            })
+            for (const [name, models] of replacements) chat.push({ name, models })
+            modelCatalog = { ...modelCatalog, chat }
+
+            for (const name of ['chatOpenAI', 'chatAnthropic', 'chatGoogleGenerativeAI'] as const) {
+                const models = lists[name]
+                if (models) console.info(`[model-catalog] ${name}: loaded ${models.length} models from Models.dev.`)
+                else console.warn(`[model-catalog] ${name}: no usable Models.dev list; keeping existing list.`)
+            }
+        } catch {
+            console.warn('[model-catalog] Models.dev refresh failed; keeping existing catalog.')
+        }
+    })().finally(() => {
+        catalogRefresh = undefined
+    })
+    return catalogRefresh
+}
+
+/** Reads never wait for the configured remote source; all consumers share the current catalog. */
+const getRawModelFile = () => {
+    void ensureBaseCatalog()
+    return modelCatalog
 }
 
 const getModelConfig = async (category: MODEL_TYPE, name: string) => {

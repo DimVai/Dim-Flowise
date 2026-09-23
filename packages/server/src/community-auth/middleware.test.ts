@@ -3,7 +3,7 @@ import { COMMUNITY_AUTH_COOKIE } from './constants'
 import { requireCommunityAuth } from './middleware'
 import { createCommunityAuthToken } from './service'
 
-const ENVIRONMENT_VARIABLES = ['FLOWISE_USERNAME', 'FLOWISE_PASSWORD', 'FLOWISE_SECRET', 'FLOWISE_JTW_DURATION'] as const
+const ENVIRONMENT_VARIABLES = ['FLOWISE_USERNAME', 'FLOWISE_PASSWORD', 'FLOWISE_SECRET', 'FLOWISE_JWΤ_DURATION'] as const
 const originalEnvironment = Object.fromEntries(ENVIRONMENT_VARIABLES.map((name) => [name, process.env[name]]))
 
 const restoreEnvironment = (): void => {
@@ -34,7 +34,7 @@ describe('community authentication middleware', () => {
         process.env.FLOWISE_USERNAME = 'community-user'
         process.env.FLOWISE_PASSWORD = 'community-password'
         process.env.FLOWISE_SECRET = 'test-only-secret-with-at-least-32-characters'
-        process.env.FLOWISE_JTW_DURATION = '24h'
+        process.env.FLOWISE_JWΤ_DURATION = '24h'
     })
 
     afterEach(() => jest.restoreAllMocks())
@@ -76,7 +76,7 @@ describe('community authentication middleware', () => {
 
         const issuedAt = Date.now()
         const dateNow = jest.spyOn(Date, 'now').mockReturnValue(issuedAt)
-        process.env.FLOWISE_JTW_DURATION = '1s'
+        process.env.FLOWISE_JWΤ_DURATION = '1s'
         const expiredToken = createCommunityAuthToken()
         dateNow.mockReturnValue(issuedAt + 2000)
         assertRejected(expiredToken, { message: 'Token Expired', retry: false })
