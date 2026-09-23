@@ -4,6 +4,7 @@ import * as path from 'path'
 import { INodeOptionsValue } from './Interface'
 import { MODEL_CATALOG_TIMEOUT_MS } from './modelCatalogConstants'
 import { fetchModelsDevChatLists } from './modelsDevCatalog'
+import { getUserHome } from './utils'
 
 export enum MODEL_TYPE {
     CHAT = 'chat',
@@ -19,16 +20,6 @@ const getModelsJSONPath = (): string => {
         }
     }
     return ''
-}
-
-const isValidUrl = (urlString: string) => {
-    let url
-    try {
-        url = new URL(urlString)
-    } catch (e) {
-        return false
-    }
-    return url.protocol === 'http:' || url.protocol === 'https:'
 }
 
 type ModelCatalog = Record<MODEL_TYPE, any[]>
@@ -58,14 +49,45 @@ let baseCatalogInitialization: Promise<void> | undefined
 let modelCatalogInitialization: Promise<void> | undefined
 let catalogRefresh: Promise<void> | undefined
 
-/** A configured source replaces the base only after a complete, usable catalog is loaded. */
+const getSavedCatalogPath = (): string => {
+    const directory = process.env.DATABASE_PATH || path.join(getUserHome(), '.flowise')
+    return path.join(directory, 'model-catalog.json')
+}
+
+const isValidUrl = (urlString: string) => {
+    let url
+    try {
+        url = new URL(urlString)
+    } catch (e) {
+        return false
+    }
+    return url.protocol === 'http:' || url.protocol === 'https:'
+}
+
+/** A missing or unusable saved catalog leaves the bundled base in place. */
+const loadSavedCatalog = async (): Promise<boolean> => {
+    try {
+        const saved: unknown = JSON.parse(await fs.promises.readFile(getSavedCatalogPath(), 'utf8'))
+        if (!isModelCatalog(saved)) throw new Error('Invalid saved model catalog')
+        modelCatalog = saved
+        catalogLogger.info('[model-catalog] Saved catalog loaded.')
+        return true
+    } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+            catalogLogger.warn('[model-catalog] Saved catalog could not be loaded; keeping bundled catalog.')
+        }
+        return false
+    }
+}
+
+/** The explicit Flowise catalog source replaces the active base only when usable. */
 const loadConfiguredBase = async (modelFile: string): Promise<void> => {
     try {
         let models: unknown
         if (isValidUrl(modelFile)) {
-            const resp = await axios.get(modelFile, { timeout: MODEL_CATALOG_TIMEOUT_MS })
-            if (resp.status !== 200) throw new Error('Error fetching model list')
-            models = resp.data
+            const response = await axios.get(modelFile, { timeout: MODEL_CATALOG_TIMEOUT_MS })
+            if (response.status !== 200) throw new Error('Error fetching model list')
+            models = response.data
         } else {
             models = JSON.parse(await fs.promises.readFile(modelFile, 'utf8'))
         }
@@ -74,7 +96,26 @@ const loadConfiguredBase = async (modelFile: string): Promise<void> => {
         catalogLogger.info('[model-catalog] Configured base loaded.')
     } catch {
         // Do not log source URLs or errors that may contain credentials.
-        catalogLogger.warn('[model-catalog] Configured base could not be loaded; keeping bundled catalog.')
+        catalogLogger.warn('[model-catalog] Configured base could not be loaded; keeping existing catalog.')
+    }
+}
+
+/** Replace a completed snapshot atomically so an interrupted write cannot corrupt the previous one. */
+const saveCatalog = async (catalog: ModelCatalog): Promise<void> => {
+    const destination = getSavedCatalogPath()
+    const temporary = `${destination}.${process.pid}.${Date.now()}.tmp`
+    try {
+        await fs.promises.mkdir(path.dirname(destination), { recursive: true })
+        await fs.promises.writeFile(temporary, JSON.stringify(catalog, null, 2), 'utf8')
+        await fs.promises.rename(temporary, destination)
+        catalogLogger.info('[model-catalog] Updated catalog saved.')
+    } catch {
+        catalogLogger.warn('[model-catalog] Updated catalog could not be saved; keeping in-memory catalog.')
+        try {
+            await fs.promises.unlink(temporary)
+        } catch {
+            // The temporary file may not exist or may be inaccessible for the same reason.
+        }
     }
 }
 
@@ -84,12 +125,14 @@ const ensureBaseCatalog = (): Promise<void> => {
     const bundled: unknown = JSON.parse(fs.readFileSync(getModelsJSONPath(), 'utf8'))
     if (!isModelCatalog(bundled)) throw new Error('Invalid bundled model catalog')
     modelCatalog = bundled
-    const configuredSource = process.env.MODEL_LIST_CONFIG_JSON
-    baseCatalogInitialization = configuredSource !== undefined ? loadConfiguredBase(configuredSource) : Promise.resolve()
+    baseCatalogInitialization = loadSavedCatalog().then(async () => {
+        const configuredSource = process.env.MODEL_LIST_CONFIG_JSON
+        if (configuredSource !== undefined) await loadConfiguredBase(configuredSource)
+    })
     return baseCatalogInitialization
 }
 
-/** Initialize once at startup without blocking readers on either remote source. */
+/** Initialize the saved and configured bases, then refresh once during startup. */
 export const initializeModelCatalog = (logger?: ModelCatalogLogger): Promise<void> => {
     if (logger) catalogLogger = logger
     if (modelCatalogInitialization) return modelCatalogInitialization
@@ -138,6 +181,7 @@ export const refreshModelCatalog = (): Promise<void> => {
                 catalogLogger.warn(
                     `[model-catalog] Dynamic Models: no usable models.dev list for ${retained.join(', ')}; keeping existing lists.`
                 )
+            if (loaded.length) await saveCatalog(modelCatalog)
         } catch {
             catalogLogger.warn('[model-catalog] Models.dev refresh failed; keeping existing catalog.')
         }
@@ -147,7 +191,7 @@ export const refreshModelCatalog = (): Promise<void> => {
     return catalogRefresh
 }
 
-/** Reads never wait for the configured remote source; all consumers share the current catalog. */
+/** Readers use the current catalog while base sources load; all consumers share it. */
 const getRawModelFile = () => {
     void ensureBaseCatalog()
     return modelCatalog

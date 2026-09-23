@@ -302,8 +302,8 @@ export class App {
 let serverApp: App | undefined
 
 export async function start(): Promise<void> {
-    // Load the bundled catalog now; configured remote sources must not delay startup.
-    void initializeModelCatalog(logger)
+    // Start catalog initialization alongside server setup, but finish it before listening.
+    const modelCatalogInitialization = initializeModelCatalog(logger)
 
     serverApp = new App()
 
@@ -313,6 +313,7 @@ export async function start(): Promise<void> {
 
     await serverApp.initDatabase()
     await serverApp.config()
+    await modelCatalogInitialization
 
     server.listen(port, host, () => {
         logger.info(`⚡️ [server]: Flowise Server is listening at ${host ? 'http://' + host : ''}:${port}`)
