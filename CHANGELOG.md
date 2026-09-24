@@ -8,10 +8,11 @@ This fork has its own version numbering, beginning with `1.0`; the current value
 
 ### Changed
 
+-   Choose new basic OpenAI, Anthropic, and Google Gemini chat node defaults from the first catalog model whose ID contains `luna`, `haiku`, and `flash`, respectively. Models.dev lists are ordered by release date; keep manual fallbacks and original Flowise defaults when dynamic models are disabled.
 -   Round Models.dev per-token input/output prices to eight decimal places before storing them in the catalog, avoiding floating-point tails in saved JSON.
 
 -   Save accepted Models.dev catalog updates as JSON in `DATABASE_PATH` or `~/.flowise` for the next startup. Keep `MODEL_LIST_CONFIG_JSON` as an explicit higher-priority base; fall back to the saved catalog, then the bundled catalog when loading fails.
--   Wait for the startup model catalog refresh or its fallback before constructing the nodes pool and before the server starts listening, so node defaults can use the updated catalog when dynamic selection is implemented.
+-   Wait for the startup model catalog refresh or its fallback before constructing the nodes pool and before the server starts listening, so node defaults can use the updated catalog.
 -   Normalize missing or invalid dynamic model prices to zero for compatibility with existing Flowise cost calculations. Route catalog messages through the shared server/worker logger with the `[model-catalog]` prefix and combine provider counts into one startup summary.
 
 -   Use the bundled model catalog instead of fetching the upstream catalog. Preserve `MODEL_LIST_CONFIG_JSON` file/HTTP(S) overrides.

@@ -204,6 +204,11 @@ const getModelConfig = async (category: MODEL_TYPE, name: string) => {
     return categoryModels.find((model: INodeOptionsValue) => model.name === name)
 }
 
+/** Synchronous read for node definitions created after catalog initialization. */
+export const getLoadedModels = (category: MODEL_TYPE, name: string): INodeOptionsValue[] => {
+    return modelCatalog?.[category]?.find((group) => group.name === name)?.models ?? []
+}
+
 export const getModelConfigByModelName = async (category: MODEL_TYPE, provider: string | undefined, name: string | undefined) => {
     const models = await getRawModelFile()
 

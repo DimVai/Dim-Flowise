@@ -22,6 +22,8 @@ Filtering is sequential: invalid IDs, deprecated entries, date-stamped IDs, narr
 
 Models are ordered by release date, newest first, with missing or invalid dates last. Month-only dates use the first day of the month; ties preserve source order. Missing display names use the ID. Valid non-negative numeric prices are converted from per million tokens to per token and rounded to at most eight decimal places before entering the catalog and its saved JSON. Values remain numbers, so JSON may use scientific notation (for example, `5e-8`); very small prices may round to zero. Missing or invalid prices become `0`, matching the existing Flowise cost consumers. Cost estimates retain the existing behavior and may be partial when source pricing is incomplete. A saved model absent from the refreshed list remains unchanged in the flow, but its catalog cost may no longer be available.
 
+For new basic OpenAI, Anthropic, and Google Gemini chat model nodes, the default is the first catalog model whose ID contains `luna`, `haiku`, or `flash`, respectively. Models.dev chat lists are ordered by release date, newest first. If no ID matches, each provider uses its manually configured fallback in `defaultChatModel.ts`. With `DISABLE_DYNAMIC_MODELS=true`, these nodes use their original Flowise defaults. Existing saved model selections are unchanged.
+
 Catalog messages use the existing Flowise server/worker logger and its timestamp/level format, with the `[model-catalog]` prefix. Successful provider counts are combined into one `INFO` line; providers retaining their fallback lists are combined into one `WARN` line. The 10-second timeout limits request waiting; it does not delay the start of the refresh.
 
 ## Authentication
