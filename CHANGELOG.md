@@ -8,6 +8,7 @@ This fork has its own version numbering, beginning with `1.0`; the current value
 
 ### Changed
 
+-   Exclude Daybreak model IDs from the dynamic chat model lists.
 -   Choose new basic OpenAI, Anthropic, and Google Gemini chat node defaults from the first catalog model whose ID contains `luna`, `haiku`, and `flash`, respectively. Models.dev lists are ordered by release date; keep manual fallbacks and original Flowise defaults when dynamic models are disabled.
 -   Round Models.dev per-token input/output prices to eight decimal places before storing them in the catalog, avoiding floating-point tails in saved JSON.
 

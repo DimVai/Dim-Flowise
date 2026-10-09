@@ -27,6 +27,8 @@ const isNotVeoModel = (model: ModelsDevModel): boolean => !/^veo-/i.test(model.i
 
 const isNotComputerUseModel = (model: ModelsDevModel): boolean => !/-computer-use(?:-|$)/i.test(model.id)
 
+const isNotDaybreakModel = (model: ModelsDevModel): boolean => !/-daybreak(?:-|$)/i.test(model.id)
+
 const isNotLiveTranslateModel = (model: ModelsDevModel): boolean => !/-live-translate(?:-|$)/i.test(model.id)
 
 const isNotRealtimeModel = (model: ModelsDevModel): boolean => !/(?:^|-)realtime(?:-|$)/i.test(model.id)
@@ -64,6 +66,7 @@ export const filterModelsDevChatModels = (models: unknown[]): ModelsDevModel[] =
         .filter(isNotLyriaModel)
         .filter(isNotVeoModel)
         .filter(isNotComputerUseModel)
+        .filter(isNotDaybreakModel)
         .filter(isNotLiveTranslateModel)
         .filter(isNotRealtimeModel)
         .filter(isNotLiveModel)
