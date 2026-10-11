@@ -1,14 +1,7 @@
 import logger from '../utils/logger'
 import { initializeModelCatalog } from 'flowise-components'
-import { QueueManager } from '../queue/QueueManager'
 import { BaseCommand } from './base'
-import { getDataSource } from '../DataSource'
-import { Telemetry } from '../utils/telemetry'
-import { NodesPool } from '../NodesPool'
-import { CachePool } from '../CachePool'
 import { QueueEvents, QueueEventsListener } from 'bullmq'
-import { AbortControllerPool } from '../AbortControllerPool'
-import { UsageCacheManager } from '../UsageCacheManager'
 
 interface CustomListener extends QueueEventsListener {
     abort: (args: { id: string }, id: string) => void
@@ -20,6 +13,7 @@ export default class Worker extends BaseCommand {
     scheduleWorkerId: string
 
     async run(): Promise<void> {
+        const { QueueManager } = await import('../queue/QueueManager')
         logger.info('Starting Flowise Worker...')
         void initializeModelCatalog(logger)
 
@@ -65,6 +59,12 @@ export default class Worker extends BaseCommand {
     }
 
     async prepareData() {
+        const { getDataSource } = await import('../DataSource')
+        const { Telemetry } = await import('../utils/telemetry')
+        const { NodesPool } = await import('../NodesPool')
+        const { CachePool } = await import('../CachePool')
+        const { AbortControllerPool } = await import('../AbortControllerPool')
+        const { UsageCacheManager } = await import('../UsageCacheManager')
         // Init database
         const appDataSource = getDataSource()
         await appDataSource.initialize()
@@ -106,6 +106,7 @@ export default class Worker extends BaseCommand {
 
     async stopProcess() {
         try {
+            const { QueueManager } = await import('../queue/QueueManager')
             const queueManager = QueueManager.getInstance()
             const predictionWorker = queueManager.getQueue('prediction').getWorker()
             logger.info(`Shutting down Flowise Prediction Worker ${this.predictionWorkerId}...`)

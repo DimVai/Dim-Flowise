@@ -7,6 +7,7 @@ dotenv.config({ path: envPath, override: true })
 export * from '../evaluation/EvaluationRunner'
 export { MCPToolkit } from '../nodes/tools/MCP/core'
 export * from './agentflowv2Generator'
+export { config, initializeConfig, FlowiseConfig } from './config'
 export * from './followUpPrompts'
 export * from './handler'
 export * from './headerValidation'

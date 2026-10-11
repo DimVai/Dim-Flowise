@@ -2,57 +2,62 @@ import { NextFunction, Request, Response } from 'express'
 import { StorageProviderFactory } from 'flowise-components'
 import * as fs from 'fs'
 import { createLogger, format, transports } from 'winston'
-import config from './config' // should be replaced by node-config or similar
+import loggingConfig from './config'
 
 const { combine, timestamp, printf, errors } = format
 
-let requestLogger: any
+const logger = createLogger({ transports: [new transports.Console()] })
+let requestLogger: ReturnType<typeof createLogger>
 
-const provider = StorageProviderFactory.getProvider()
-const serverTransports = provider.getLoggerTransports('server', config)
-const errorTransports = provider.getLoggerTransports('error', config)
-const requestTransports = provider.getLoggerTransports('requests', config)
-const auditTransports = provider.getLoggerTransports('audit', config)
+export const initializeLogger = (): void => {
+    const provider = StorageProviderFactory.getProvider()
+    const serverTransports = provider.getLoggerTransports('server', loggingConfig)
+    const errorTransports = provider.getLoggerTransports('error', loggingConfig)
+    const requestTransports = provider.getLoggerTransports('requests', loggingConfig)
+    const auditTransports = provider.getLoggerTransports('audit', loggingConfig)
 
-// expect the log dir be relative to the projects root
-const logDir = config.logging.dir
+    // Paths are available after initializeConfig().
+    const logDir = loggingConfig.logging.dir
 
-// Create the log directory if it doesn't exist
-if (!fs.existsSync(logDir)) {
-    fs.mkdirSync(logDir)
+    // Create the log directory if it doesn't exist
+    if (!fs.existsSync(logDir)) {
+        fs.mkdirSync(logDir, { recursive: true })
+    }
+
+    logger.configure({
+        format: combine(
+            timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+            format.json(),
+            printf(({ level, message, timestamp, stack }) => {
+                const text = `${timestamp} [${level.toUpperCase()}]: ${message}`
+                return stack ? text + '\n' + stack : text
+            }),
+            errors({ stack: true })
+        ),
+        defaultMeta: {
+            package: 'server'
+        },
+        exitOnError: false,
+        transports: [new transports.Console(), ...serverTransports],
+        exceptionHandlers: [...(process.env.DEBUG && process.env.DEBUG === 'true' ? [new transports.Console()] : []), ...errorTransports],
+        rejectionHandlers: [
+            ...(process.env.DEBUG && process.env.DEBUG === 'true' ? [new transports.Console()] : []),
+            ...errorTransports,
+            // Always provide a fallback rejection handler when no other handlers are configured
+            ...((!process.env.DEBUG || process.env.DEBUG !== 'true') && errorTransports.length === 0 ? [new transports.Console()] : [])
+        ]
+    })
+
+    requestLogger = createLogger({
+        format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), format.json(), errors({ stack: true })),
+        defaultMeta: {
+            package: 'server'
+        },
+        transports: [...(process.env.DEBUG && process.env.DEBUG === 'true' ? [new transports.Console()] : []), ...requestTransports]
+    })
+
+    for (const transport of auditTransports) auditLogger.add(transport)
 }
-
-const logger = createLogger({
-    format: combine(
-        timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-        format.json(),
-        printf(({ level, message, timestamp, stack }) => {
-            const text = `${timestamp} [${level.toUpperCase()}]: ${message}`
-            return stack ? text + '\n' + stack : text
-        }),
-        errors({ stack: true })
-    ),
-    defaultMeta: {
-        package: 'server'
-    },
-    exitOnError: false,
-    transports: [new transports.Console(), ...serverTransports],
-    exceptionHandlers: [...(process.env.DEBUG && process.env.DEBUG === 'true' ? [new transports.Console()] : []), ...errorTransports],
-    rejectionHandlers: [
-        ...(process.env.DEBUG && process.env.DEBUG === 'true' ? [new transports.Console()] : []),
-        ...errorTransports,
-        // Always provide a fallback rejection handler when no other handlers are configured
-        ...((!process.env.DEBUG || process.env.DEBUG !== 'true') && errorTransports.length === 0 ? [new transports.Console()] : [])
-    ]
-})
-
-requestLogger = createLogger({
-    format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), format.json(), errors({ stack: true })),
-    defaultMeta: {
-        package: 'server'
-    },
-    transports: [...(process.env.DEBUG && process.env.DEBUG === 'true' ? [new transports.Console()] : []), ...requestTransports]
-})
 
 function getSensitiveBodyFields(): string[] {
     if (!process.env.LOG_SANITIZE_BODY_FIELDS) return []
@@ -148,7 +153,7 @@ export const auditLogger = createLogger({
     format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), format.json(), errors({ stack: true })),
     defaultMeta: { package: 'server' },
     exitOnError: false,
-    transports: [...(process.env.DEBUG === 'true' ? [new transports.Console()] : []), ...auditTransports]
+    transports: process.env.DEBUG === 'true' ? [new transports.Console()] : []
 })
 
 export default logger

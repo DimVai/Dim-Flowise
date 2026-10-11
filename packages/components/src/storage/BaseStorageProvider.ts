@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import sanitize from 'sanitize-filename'
-import { getUserHome } from '../utils'
+import { config } from '../config'
 import { isPathTraversal, isUnsafeFilePath, isValidUUID } from '../validator'
 import { FileInfo, IStorageProvider, StorageResult, StorageSizeResult } from './IStorageProvider'
 
@@ -60,9 +60,7 @@ export abstract class BaseStorageProvider implements IStorageProvider {
      * Shared utility for getting the base storage path
      */
     protected getStoragePath(): string {
-        const storagePath = process.env.BLOB_STORAGE_PATH
-            ? path.join(process.env.BLOB_STORAGE_PATH)
-            : path.join(getUserHome(), '.flowise', 'storage')
+        const storagePath = config.BLOB_STORAGE_PATH
 
         if (!fs.existsSync(storagePath)) {
             fs.mkdirSync(storagePath, { recursive: true })

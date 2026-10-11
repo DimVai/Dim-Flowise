@@ -1,6 +1,7 @@
 import path from 'path'
 import sanitize from 'sanitize-filename'
-import { getUserHome, isAllowedUploadMimeType, mapMimeTypeToExt } from './utils'
+import { isAllowedUploadMimeType, mapMimeTypeToExt } from './utils'
+import { config } from './config'
 
 /**
  * Validates if a string is a valid UUID v4
@@ -185,18 +186,7 @@ export const filterAllowedUploadMimeTypes = (mimeTypes: string[]): string[] => {
  * @returns {string[]} Array of allowed base directory paths
  */
 const getAllowedVectorStoreBaseDirs = (): string[] => {
-    const allowedDirs: string[] = []
-
-    // Allow user home .flowise directory
-    const userHome = getUserHome()
-    allowedDirs.push(path.join(userHome, '.flowise'))
-
-    // Allow configured blob storage path if set
-    if (process.env.BLOB_STORAGE_PATH) {
-        allowedDirs.push(path.resolve(process.env.BLOB_STORAGE_PATH))
-    }
-
-    return allowedDirs
+    return [config.FLOWISE_DATA_PATH, config.BLOB_STORAGE_PATH]
 }
 
 /**
@@ -212,15 +202,15 @@ const getAllowedVectorStoreBaseDirs = (): string[] => {
 export const validateVectorStorePath = (userProvidedPath: string | undefined): string => {
     if (process.env.PATH_TRAVERSAL_SAFETY === 'false') {
         if (!userProvidedPath || userProvidedPath.trim() === '') {
-            return path.join(getUserHome(), '.flowise', 'vectorstore')
+            return config.VECTORSTORE_PATH
         }
         const bypassPath = userProvidedPath.trim()
-        return path.isAbsolute(bypassPath) ? bypassPath : path.resolve(path.join(getUserHome(), '.flowise', bypassPath))
+        return path.isAbsolute(bypassPath) ? bypassPath : path.resolve(path.join(config.FLOWISE_DATA_PATH, bypassPath))
     }
 
     // If no path provided, use default secure location
     if (!userProvidedPath || userProvidedPath.trim() === '') {
-        return path.join(getUserHome(), '.flowise', 'vectorstore')
+        return config.VECTORSTORE_PATH
     }
 
     const basePath = userProvidedPath.trim()
@@ -240,9 +230,9 @@ export const validateVectorStorePath = (userProvidedPath: string | undefined): s
         throw new Error('Invalid path: null bytes or control characters detected')
     }
 
-    // Check for Windows-specific absolute paths and UNC paths (even on Unix systems)
-    // This prevents cross-platform attack vectors
-    if (/^[a-zA-Z]:\\/.test(basePath)) {
+    // Accept native Windows drive paths, but reject them on other platforms.
+    // UNC and extended-length paths remain disallowed.
+    if (process.platform !== 'win32' && /^[a-zA-Z]:\\/.test(basePath)) {
         throw new Error('Invalid path: Windows absolute paths are not allowed')
     }
     if (/^\\\\[^\\]/.test(basePath)) {
@@ -253,14 +243,14 @@ export const validateVectorStorePath = (userProvidedPath: string | undefined): s
     }
 
     // Resolve to absolute path
-    // If path is relative, resolve it relative to the .flowise directory (safe default)
+    // If path is relative, resolve it relative to the configured data directory (safe default)
     // If path is already absolute, keep it as-is
     let resolvedPath: string
     if (path.isAbsolute(basePath)) {
         resolvedPath = path.resolve(basePath)
     } else {
-        // Relative paths are resolved within the .flowise directory for safety
-        resolvedPath = path.resolve(path.join(getUserHome(), '.flowise', basePath))
+        // Relative paths are resolved within the configured data directory for safety
+        resolvedPath = path.resolve(path.join(config.FLOWISE_DATA_PATH, basePath))
     }
 
     // Verify the resolved path doesn't contain '..' after resolution
@@ -286,11 +276,7 @@ export const validateVectorStorePath = (userProvidedPath: string | undefined): s
 }
 
 const getAllowedSQLiteBaseDirs = (): string[] => {
-    const dirs = [path.join(getUserHome(), '.flowise')]
-    if (process.env.DATABASE_PATH) {
-        dirs.push(path.resolve(process.env.DATABASE_PATH))
-    }
-    return dirs
+    return [config.FLOWISE_DATA_PATH, config.DATABASE_PATH]
 }
 
 const normalizePlatformPath = (p: string): string => {
@@ -310,8 +296,8 @@ const isPathWithinAllowedSQLiteDirs = (resolvedPath: string, allowedDirs: string
  * Validates and sanitizes a SQLite database file path to prevent path traversal
  * and arbitrary file write attacks.
  *
- * Relative paths are resolved within ~/.flowise/. Absolute paths must fall inside
- * ~/.flowise/ or DATABASE_PATH when set. Set PATH_TRAVERSAL_SAFETY=false to bypass all checks (not recommended).
+ * Relative paths are resolved within FLOWISE_DATA_PATH. Absolute paths must fall inside
+ * FLOWISE_DATA_PATH or DATABASE_PATH. Set PATH_TRAVERSAL_SAFETY=false to bypass all checks (not recommended).
  *
  * @param {string | undefined} userProvidedPath - File path supplied by the user in the node config
  * @returns {string} A validated, absolute path within an allowed base directory
@@ -341,7 +327,8 @@ export const validateSQLitePath = (userProvidedPath: string | undefined): string
     // eslint-disable-next-line no-control-regex
     if (/\0/.test(basePath) || /[\x00-\x1f]/.test(basePath))
         throw new Error('Invalid SQLite path: null bytes or control characters detected')
-    if (/^[a-zA-Z]:\\/.test(basePath)) throw new Error('Invalid SQLite path: Windows absolute paths are not allowed')
+    if (process.platform !== 'win32' && /^[a-zA-Z]:\\/.test(basePath))
+        throw new Error('Invalid SQLite path: Windows absolute paths are not allowed')
     if (/^\\\\[^\\]/.test(basePath)) throw new Error('Invalid SQLite path: UNC paths are not allowed')
     if (/^\\\\\?\\/.test(basePath)) throw new Error('Invalid SQLite path: extended-length paths are not allowed')
 

@@ -1,3 +1,4 @@
+import { config } from 'flowise-components'
 import path from 'path'
 import * as fs from 'fs'
 import { StatusCodes } from 'http-status-codes'
@@ -70,9 +71,7 @@ const getLogs = async (startDate?: string, endDate?: string) => {
 
         for (let i = 0; i < files.length; i++) {
             const date = files[i]
-            const filePath = process.env.LOG_PATH
-                ? path.resolve(process.env.LOG_PATH, `server.log.${date}`)
-                : path.join(__dirname, '..', '..', '..', 'logs', `server.log.${date}`)
+            const filePath = path.join(config.LOG_PATH, `server.log.${date}`)
             if (fs.existsSync(filePath)) {
                 promises.push(readFile(filePath))
             } else {

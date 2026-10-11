@@ -1,4 +1,5 @@
 import fs from 'fs'
+import { config } from '../config'
 import multer from 'multer'
 import path from 'node:path'
 import { transports } from 'winston'
@@ -341,17 +342,11 @@ export class LocalStorageProvider extends BaseStorageProvider {
     }
 
     private getUploadPath(): string {
-        return process.env.BLOB_STORAGE_PATH
-            ? path.join(process.env.BLOB_STORAGE_PATH, 'uploads')
-            : path.join(this.getUserHome(), '.flowise', 'uploads')
+        return config.UPLOAD_PATH
     }
 
-    private getUserHome(): string {
-        return process.env.HOME || process.env.USERPROFILE || process.env.HOMEPATH || ''
-    }
-
-    getLoggerTransports(logType: 'server' | 'error' | 'requests' | 'audit', config?: any): any[] {
-        const logDir = config?.logging?.dir || path.join(this.getUserHome(), '.flowise', 'logs')
+    getLoggerTransports(logType: 'server' | 'error' | 'requests' | 'audit', loggingConfig?: any): any[] {
+        const logDir = config.LOG_PATH
 
         if (!fs.existsSync(logDir)) {
             fs.mkdirSync(logDir, { recursive: true })
@@ -360,17 +355,17 @@ export class LocalStorageProvider extends BaseStorageProvider {
         if (logType === 'server') {
             return [
                 new DailyRotateFile({
-                    filename: path.join(logDir, config?.logging?.server?.filename ?? 'server-%DATE%.log'),
+                    filename: path.join(logDir, loggingConfig?.logging?.server?.filename ?? 'server-%DATE%.log'),
                     datePattern: 'YYYY-MM-DD-HH',
                     maxSize: '20m',
-                    level: config?.logging?.server?.level ?? 'info'
+                    level: loggingConfig?.logging?.server?.level ?? 'info'
                 })
             ]
         } else if (logType === 'requests') {
             return [
                 new transports.File({
-                    filename: path.join(logDir, config?.logging?.express?.filename ?? 'server-requests.log.jsonl'),
-                    level: config?.logging?.express?.level ?? 'debug'
+                    filename: path.join(logDir, loggingConfig?.logging?.express?.filename ?? 'server-requests.log.jsonl'),
+                    level: loggingConfig?.logging?.express?.level ?? 'debug'
                 })
             ]
         } else if (logType === 'audit') {

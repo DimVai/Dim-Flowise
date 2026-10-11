@@ -2,7 +2,7 @@ import 'reflect-metadata'
 import path from 'path'
 import * as fs from 'fs'
 import { DataSource } from 'typeorm'
-import { getUserHome } from './utils'
+import { config } from 'flowise-components'
 import { entities } from './database/entities'
 import { sqliteMigrations } from './database/migrations/sqlite'
 import { mysqlMigrations } from './database/migrations/mysql'
@@ -13,17 +13,12 @@ import logger from './utils/logger'
 let appDataSource: DataSource
 
 export const init = async (): Promise<void> => {
-    let homePath
-    let flowisePath = path.join(getUserHome(), '.flowise')
-    if (!fs.existsSync(flowisePath)) {
-        fs.mkdirSync(flowisePath)
-    }
+    fs.mkdirSync(config.DATABASE_PATH, { recursive: true })
     switch (process.env.DATABASE_TYPE) {
         case 'sqlite':
-            homePath = process.env.DATABASE_PATH ?? flowisePath
             appDataSource = new DataSource({
                 type: 'sqlite',
-                database: path.resolve(homePath, 'database.sqlite'),
+                database: path.join(config.DATABASE_PATH, 'database.sqlite'),
                 synchronize: false,
                 migrationsRun: false,
                 entities: Object.values(entities),
@@ -88,10 +83,9 @@ export const init = async (): Promise<void> => {
             })
             break
         default:
-            homePath = process.env.DATABASE_PATH ?? flowisePath
             appDataSource = new DataSource({
                 type: 'sqlite',
-                database: path.resolve(homePath, 'database.sqlite'),
+                database: path.join(config.DATABASE_PATH, 'database.sqlite'),
                 synchronize: false,
                 migrationsRun: false,
                 entities: Object.values(entities),

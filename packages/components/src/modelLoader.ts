@@ -4,7 +4,7 @@ import * as path from 'path'
 import { INodeOptionsValue } from './Interface'
 import { MODEL_CATALOG_TIMEOUT_MS } from './modelCatalogConstants'
 import { fetchModelsDevChatLists } from './modelsDevCatalog'
-import { getUserHome } from './utils'
+import { config } from './config'
 
 export enum MODEL_TYPE {
     CHAT = 'chat',
@@ -50,7 +50,7 @@ let modelCatalogInitialization: Promise<void> | undefined
 let catalogRefresh: Promise<void> | undefined
 
 const getSavedCatalogPath = (): string => {
-    const directory = process.env.DATABASE_PATH || path.join(getUserHome(), '.flowise')
+    const directory = config.DATABASE_PATH
     return path.join(directory, 'model-catalog.json')
 }
 

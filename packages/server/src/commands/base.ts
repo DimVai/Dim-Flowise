@@ -1,7 +1,8 @@
 import { Command, Flags } from '@oclif/core'
 import dotenv from 'dotenv'
 import path from 'path'
-import logger from '../utils/logger'
+import { config, initializeConfig } from 'flowise-components'
+import logger, { initializeLogger } from '../utils/logger'
 
 dotenv.config({ path: path.join(__dirname, '..', '..', '.env'), override: true })
 
@@ -13,6 +14,7 @@ enum EXIT_CODE {
 export abstract class BaseCommand extends Command {
     static flags = {
         // General Settings
+        FLOWISE_DATA_PATH: Flags.string(),
         FLOWISE_FILE_SIZE_LIMIT: Flags.string(),
         CUSTOM_MCP_TOOLS_MAX_BYTES: Flags.string(),
         CUSTOM_MCP_AUTHORIZE_TIMEOUT_MS: Flags.string(),
@@ -194,5 +196,9 @@ export abstract class BaseCommand extends Command {
                 process.env[key] = flags[key]
             }
         })
+
+        initializeConfig()
+        initializeLogger()
+        logger.info(`Flowise data directory: ${config.FLOWISE_DATA_PATH}`)
     }
 }

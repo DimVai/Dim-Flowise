@@ -1,6 +1,5 @@
 import fs from 'fs'
-import path from 'path'
-import { getUserHome } from './utils'
+import { config } from './config'
 import { StorageProviderFactory, StorageResult, StorageSizeResult, FileInfo } from './storage'
 
 export const addBase64FilesToStorage = async (
@@ -48,9 +47,7 @@ export const getFilesListFromStorage = async (...paths: string[]): Promise<FileI
  * Prepare storage path
  */
 export const getStoragePath = (): string => {
-    const storagePath = process.env.BLOB_STORAGE_PATH
-        ? path.join(process.env.BLOB_STORAGE_PATH)
-        : path.join(getUserHome(), '.flowise', 'storage')
+    const storagePath = config.BLOB_STORAGE_PATH
     if (!fs.existsSync(storagePath)) {
         fs.mkdirSync(storagePath, { recursive: true })
     }

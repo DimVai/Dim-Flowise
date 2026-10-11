@@ -23,6 +23,7 @@ import { customGet } from '../nodes/sequentialagents/commonUtils'
 import { checkDenyList, secureAxiosRequest, secureFetch } from './httpSecurity'
 import { ICommonObject, IDatabaseEntity, IFileUpload, IMessage, INodeData, IVariable, MessageContentImageUrl } from './Interface'
 import { getFileFromStorage } from './storageUtils'
+import { config } from './config'
 
 export const numberOrExpressionRegex = '^(\\d+\\.?\\d*|{{.*}})$' //return true if string consists only numbers OR expression {{}}
 export const notEmptyRegex = '(.|\\s)*\\S(.|\\s)*' //return true if string is not empty or blank
@@ -547,52 +548,15 @@ export const getEnvironmentVariable = (name: string): string | undefined => {
  * Returns the path of encryption key
  * @returns {string}
  */
-const getEncryptionKeyFilePath = (): string => {
-    const checkPaths = [
-        path.join(__dirname, '..', '..', 'encryption.key'),
-        path.join(__dirname, '..', '..', 'server', 'encryption.key'),
-        path.join(__dirname, '..', '..', '..', 'encryption.key'),
-        path.join(__dirname, '..', '..', '..', 'server', 'encryption.key'),
-        path.join(__dirname, '..', '..', '..', '..', 'encryption.key'),
-        path.join(__dirname, '..', '..', '..', '..', 'server', 'encryption.key'),
-        path.join(__dirname, '..', '..', '..', '..', '..', 'encryption.key'),
-        path.join(__dirname, '..', '..', '..', '..', '..', 'server', 'encryption.key'),
-        path.join(getUserHome(), '.flowise', 'encryption.key')
-    ]
-    for (const checkPath of checkPaths) {
-        if (fs.existsSync(checkPath)) {
-            return checkPath
-        }
-    }
-    return ''
-}
-
 export const getEncryptionKeyPath = (): string => {
-    return process.env.SECRETKEY_PATH ? path.join(process.env.SECRETKEY_PATH, 'encryption.key') : getEncryptionKeyFilePath()
+    return path.join(config.SECRETKEY_PATH, 'encryption.key')
 }
 
 /**
- * Returns the encryption key
- * @returns {Promise<string>}
+ * Returns the configured encryption key.
  */
 const getEncryptionKey = async (): Promise<string> => {
-    if (process.env.FLOWISE_SECRETKEY_OVERWRITE !== undefined && process.env.FLOWISE_SECRETKEY_OVERWRITE !== '') {
-        return process.env.FLOWISE_SECRETKEY_OVERWRITE
-    }
-    try {
-        if (USE_AWS_SECRETS_MANAGER && secretsManagerClient) {
-            const secretId = process.env.SECRETKEY_AWS_NAME || 'FlowiseEncryptionKey'
-            const command = new GetSecretValueCommand({ SecretId: secretId })
-            const response = await secretsManagerClient.send(command)
-
-            if (response.SecretString) {
-                return response.SecretString
-            }
-        }
-        return await fs.promises.readFile(getEncryptionKeyPath(), 'utf8')
-    } catch (error) {
-        throw new Error(error)
-    }
+    return config.FLOWISE_SECRETKEY_OVERWRITE
 }
 
 /**

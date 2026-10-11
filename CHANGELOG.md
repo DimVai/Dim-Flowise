@@ -8,6 +8,11 @@ This fork has its own version numbering, beginning with `1.0`; the current value
 
 ### Changed
 
+-   Document the simplified PaaS setup using three authentication variables and one persistent-volume path, with guidance for retaining credential encryption keys across deployments and migrations.
+
+-   Add `FLOWISE_DATA_PATH` as the shared data root, defaulting to `~/.flowise`, with individual path overrides. Logs now default to `<root>/logs` and temporary uploads to `<storage>/uploads`. Existing files are not moved automatically. See [Persistence](CONFIGURATION.md#persistence).
+-   Use `FLOWISE_SECRET` for stored-credential encryption when `FLOWISE_SECRETKEY_OVERWRITE` is unset or empty. Existing installations must retain their previous encryption key as an explicit override; local `encryption.key` files and AWS encryption-key secrets are no longer fallback sources. Keep the startup data-directory message without dumping the configuration object.
+
 -   Exclude Daybreak model IDs from the dynamic chat model lists.
 -   Choose new basic OpenAI, Anthropic, and Google Gemini chat node defaults from the first catalog model whose ID contains `luna`, `haiku`, and `flash`, respectively. Models.dev lists are ordered by release date; keep manual fallbacks and original Flowise defaults when dynamic models are disabled.
 -   Round Models.dev per-token input/output prices to eight decimal places before storing them in the catalog, avoiding floating-point tails in saved JSON.

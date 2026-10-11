@@ -1,13 +1,15 @@
-import * as Server from '../index'
-import * as DataSource from '../DataSource'
 import logger from '../utils/logger'
 import { BaseCommand } from './base'
 
 export default class Start extends BaseCommand {
+    private server: typeof import('../index') | undefined
+
     async run(): Promise<void> {
+        const DataSource = await import('../DataSource')
+        this.server = await import('../index')
         logger.info('Starting Flowise...')
         await DataSource.init()
-        await Server.start()
+        await this.server.start()
     }
 
     async catch(error: Error) {
@@ -21,7 +23,7 @@ export default class Start extends BaseCommand {
     async stopProcess() {
         try {
             logger.info(`Shutting down Flowise...`)
-            const serverApp = Server.getInstance()
+            const serverApp = this.server?.getInstance()
             if (serverApp) await serverApp.stopApp()
         } catch (error) {
             logger.error('There was an error shutting down Flowise...', error)
