@@ -33,7 +33,7 @@ Catalog messages use the existing Flowise server/worker logger and its timestamp
 | `FLOWISE_USERNAME`     | Yes      | None    | Username for the single owner account.                                                                              |
 | `FLOWISE_PASSWORD`     | Yes      | None    | Password for that account.                                                                                          |
 | `FLOWISE_SECRET`       | Yes      | None    | Token-signing secret and default credential encryption key; at least 32 characters. Use a randomly generated value. |
-| `FLOWISE_JWΤ_DURATION` | No       | `24h`   | Lifetime of newly issued tokens and their cookies. Examples: `30m`, `24h`, `3d`.                                    |
+| `FLOWISE_JWT_DURATION` | No       | `24h`   | Lifetime of newly issued tokens and their cookies. Examples: `30m`, `24h`, `3d`.                                    |
 | `SECURE_COOKIES`       | No       | `false` | Set to `true` when the browser accesses the application over HTTPS. Leave unset or `false` for local HTTP.          |
 
 Minimal local configuration:
@@ -43,7 +43,7 @@ PORT=3000
 FLOWISE_USERNAME=owner
 FLOWISE_PASSWORD="replace-with-your-own-password"
 FLOWISE_SECRET="replace-with-a-random-secret-of-at-least-32-characters"
-FLOWISE_JWΤ_DURATION=24h
+FLOWISE_JWT_DURATION=24h
 ```
 
 For example, generate a secret locally with Node.js:
@@ -52,7 +52,7 @@ For example, generate a secret locally with Node.js:
 node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
 ```
 
-The application refuses to start if a required value is missing or blank, the signing secret is shorter than 32 characters, or the configured duration is invalid, non-positive, or shorter than one second. **`FLOWISE_JWΤ_DURATION` is the exact implemented name**, including `JTW`; `FLOWISE_JWT_DURATION` is not an alias.
+The application refuses to start if a required value is missing or blank, the signing secret is shorter than 32 characters, or the configured duration is invalid, non-positive, or shorter than one second. Use `FLOWISE_JWT_DURATION` with ASCII Latin characters. Earlier misspellings are no longer supported; update existing environment settings to this name.
 
 Login creates a signed token in the `flowise_auth` cookie, with `HttpOnly`, `SameSite=Lax`, and the configured lifetime. Logout clears the browser cookie. There is no commercial identity service, account registration, password-reset email, or refresh-token flow. Login is limited to 10 requests per IP in a 15-minute window.
 

@@ -36,9 +36,10 @@ const ORIGINAL_ENV = process.env
 
 describe('logger.ts', () => {
     beforeAll(() => {
-        mockExistsSync.mockReturnValue(false) // so line 22 (mkdirSync) runs when module loads
+        mockExistsSync.mockReturnValue(false) // exercise directory creation during explicit initialization
         jest.resetModules()
         const mod = require('../../src/utils/logger')
+        mod.initializeLogger()
         logger = mod.default
         expressRequestLogger = mod.expressRequestLogger
         auditLogger = mod.auditLogger

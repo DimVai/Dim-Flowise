@@ -8,6 +8,8 @@ This fork has its own version numbering, beginning with `1.0`; the current value
 
 ### Changed
 
+-   Correct the authentication duration variable name to `FLOWISE_JWT_DURATION` using ASCII Latin characters. Existing deployments must rename the previous misspelled environment variable; its value and the `24h` default are unchanged.
+
 -   Document the simplified PaaS setup using three authentication variables and one persistent-volume path, with guidance for retaining credential encryption keys across deployments and migrations.
 
 -   Add `FLOWISE_DATA_PATH` as the shared data root, defaulting to `~/.flowise`, with individual path overrides. Logs now default to `<root>/logs` and temporary uploads to `<storage>/uploads`. Existing files are not moved automatically. See [Persistence](CONFIGURATION.md#persistence).
@@ -28,6 +30,10 @@ This fork has its own version numbering, beginning with `1.0`; the current value
 
 ### Fixed
 
+-   Supply the required cost field in the MetricsDisplay locale test fixture to fix the observe package TypeScript build error (TS2741).
+
+-   Convert credential-comparison HMAC keys and digests to `Uint8Array` for TypeScript compatibility with Node.js crypto types, preserving the same bytes and authentication behavior.
+
 -   Preserve HTTP error statuses from prediction execution, so missing or invalid flow API keys return 401 instead of 500.
 
 -   Add explicit Express handler types to the API-key middleware exports to resolve TypeScript declaration build errors (TS2742).
@@ -47,7 +53,7 @@ This fork has its own version numbering, beginning with `1.0`; the current value
 -   Display the Dim-Flowise version below the installed Flowise version in About, sourced from `forkVersion` in `packages/server/package.json` (initial value `1.2`). Installed versions remain available if the upstream release lookup fails.
 
 -   Single-user authentication using required `FLOWISE_USERNAME`, `FLOWISE_PASSWORD`, and `FLOWISE_SECRET` environment variables, with a signed `HttpOnly` login cookie and login rate limiting.
--   Configurable token and cookie lifetime through `FLOWISE_JWΤ_DURATION` (default `24h`).
+-   Configurable token and cookie lifetime through `FLOWISE_JWT_DURATION` (default `24h`).
 -   Community migrations that normalize workspace-scoped records to workspace `"0"` and remove dependencies on commercial workspace entities.
 -   English documentation for this fork, including a configuration reference, explicit contribution policy, and acknowledgment of the original Flowise project.
 

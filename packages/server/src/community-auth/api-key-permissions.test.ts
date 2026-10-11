@@ -135,7 +135,7 @@ app.use((error: any, _req: Request, res: Response, _next: NextFunction) =>
     res.status(error.statusCode || 500).json({ message: error.message })
 )
 
-const envNames = ['FLOWISE_USERNAME', 'FLOWISE_PASSWORD', 'FLOWISE_SECRET', 'FLOWISE_JWΤ_DURATION'] as const
+const envNames = ['FLOWISE_USERNAME', 'FLOWISE_PASSWORD', 'FLOWISE_SECRET', 'FLOWISE_JWT_DURATION'] as const
 const originalEnv = Object.fromEntries(envNames.map((name) => [name, process.env[name]]))
 const token = 'test-only-api-key'
 const hash = generateSecretHash(token)
@@ -159,7 +159,7 @@ beforeEach(() => {
     process.env.FLOWISE_USERNAME = 'test-owner'
     process.env.FLOWISE_PASSWORD = 'test-password'
     process.env.FLOWISE_SECRET = 'test-only-secret-with-at-least-32-characters'
-    process.env.FLOWISE_JWΤ_DURATION = '24h'
+    process.env.FLOWISE_JWT_DURATION = '24h'
     mockKeys.splice(0, mockKeys.length, key())
     mockHistory = [{ id: 'h1', chatflowid: 'chat' }]
     jest.clearAllMocks()

@@ -12,6 +12,10 @@ function renderWithTheme(ui: ReactElement) {
 }
 
 describe('MetricsDisplay', () => {
+    afterEach(() => {
+        jest.restoreAllMocks()
+    })
+
     it('renders nothing when output is undefined', () => {
         const { container } = renderWithTheme(<MetricsDisplay output={undefined} />)
         expect(container.firstChild).toBeNull()
@@ -36,9 +40,22 @@ describe('MetricsDisplay', () => {
         expect(screen.getByText('5 tokens')).toBeInTheDocument()
     })
 
-    it('renders only the tokens chip when only tokens are present', () => {
+    it('formats tokens using the default locale', () => {
         renderWithTheme(<MetricsDisplay output={{ usageMetadata: { total_tokens: 1234, total_cost: 0 } }} />)
-        expect(screen.getByText('1,234 tokens')).toBeInTheDocument()
+        expect(screen.getByText(`${(1234).toLocaleString()} tokens`)).toBeInTheDocument()
+    })
+
+    it.each([
+        ['el-GR', '1.234 tokens'],
+        ['en-US', '1,234 tokens']
+    ])('formats tokens with the %s locale', (locale, expected) => {
+        const toLocaleString = Number.prototype.toLocaleString
+        jest.spyOn(Number.prototype, 'toLocaleString').mockImplementation(function (this: number, locales, options) {
+            return toLocaleString.call(this, locales ?? locale, options)
+        })
+
+        renderWithTheme(<MetricsDisplay output={{ usageMetadata: { total_tokens: 1234, total_cost: 0 } }} />)
+        expect(screen.getByText(expected)).toBeInTheDocument()
     })
 
     it('formats cost with 6 decimals when below $0.01', () => {

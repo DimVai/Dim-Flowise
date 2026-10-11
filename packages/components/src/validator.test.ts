@@ -10,7 +10,45 @@ import {
 } from './validator'
 import path from 'path'
 import { getUserHome } from './utils'
-import * as utils from './utils'
+
+// Use the real initializer in a fresh module registry for each configuration.
+// The getter lets the statically imported validators see that isolated config.
+let mockConfig: Readonly<import('./config').FlowiseConfig>
+jest.mock('./config', () => ({
+    get config() {
+        return mockConfig
+    }
+}))
+
+const initializeTestConfig = () => {
+    jest.isolateModules(() => {
+        const { initializeConfig } = jest.requireActual<typeof import('./config')>('./config')
+        mockConfig = initializeConfig()
+    })
+}
+
+const originalEnv = process.env
+const originalPlatform = process.platform
+
+beforeEach(() => {
+    process.env = { ...originalEnv, FLOWISE_SECRET: 'validator-test-secret' }
+    for (const key of [
+        'FLOWISE_DATA_PATH',
+        'DATABASE_PATH',
+        'BLOB_STORAGE_PATH',
+        'SECRETKEY_PATH',
+        'LOG_PATH',
+        'FLOWISE_SECRETKEY_OVERWRITE',
+        'PATH_TRAVERSAL_SAFETY'
+    ])
+        delete process.env[key]
+    initializeTestConfig()
+})
+
+afterEach(() => {
+    process.env = originalEnv
+    Object.defineProperty(process, 'platform', { value: originalPlatform, configurable: true })
+})
 
 describe('isPathTraversal', () => {
     describe('returns true for dangerous patterns', () => {
@@ -408,6 +446,7 @@ describe('validateVectorStorePath', () => {
         it('should allow path within BLOB_STORAGE_PATH when configured', () => {
             const customStoragePath = path.join(userHome, 'custom-storage')
             process.env.BLOB_STORAGE_PATH = customStoragePath
+            initializeTestConfig()
 
             const testPath = path.join(customStoragePath, 'vectorstore', 'faiss')
             const result = validateVectorStorePath(testPath)
@@ -417,6 +456,7 @@ describe('validateVectorStorePath', () => {
 
         it('should allow path within .flowise even when BLOB_STORAGE_PATH is configured', () => {
             process.env.BLOB_STORAGE_PATH = path.join(userHome, 'custom-storage')
+            initializeTestConfig()
 
             const flowisePath = path.join(defaultFlowisePath, 'vectorstore')
             const result = validateVectorStorePath(flowisePath)
@@ -560,7 +600,9 @@ describe('validateSQLitePath', () => {
     describe('disallowed absolute paths', () => {
         it('should reject Windows absolute path (C:\\)', () => {
             expect(() => validateSQLitePath('C:\\Windows\\System32\\db.sqlite')).toThrow(
-                'Invalid SQLite path: Windows absolute paths are not allowed'
+                originalPlatform === 'win32'
+                    ? /Invalid SQLite path: path must be within allowed directories/
+                    : /Invalid SQLite path: Windows absolute paths are not allowed/
             )
         })
 
@@ -602,12 +644,14 @@ describe('validateSQLitePath', () => {
         it('should accept database file under DATABASE_PATH when set', () => {
             const customBase = path.join(userHome, 'custom-flowise-data')
             process.env.DATABASE_PATH = customBase
+            initializeTestConfig()
             const dbPath = path.join(customBase, 'database.sqlite')
             expect(validateSQLitePath(dbPath)).toBe(path.resolve(dbPath))
         })
 
         it('should still reject paths outside DATABASE_PATH and .flowise', () => {
             process.env.DATABASE_PATH = path.join(userHome, 'custom-flowise-data')
+            initializeTestConfig()
             expect(() => validateSQLitePath('/etc/chromium/exploit.conf')).toThrow(/Invalid SQLite path:/)
         })
     })
@@ -644,23 +688,20 @@ describe('validateSQLitePath', () => {
     })
 
     describe('Windows case-insensitive path comparison', () => {
-        // Simulate Windows: getUserHome() returns mixed-case path, user supplies lowercase version.
-        // path.normalize() on Unix preserves casing, so this exercises the toLowerCase branch.
+        // Simulate Windows casing rules with a configured mixed-case data root.
         beforeEach(() => {
             Object.defineProperty(process, 'platform', { value: 'win32', configurable: true })
-            jest.spyOn(utils, 'getUserHome').mockReturnValue('/Users/TestUser')
+            process.env.FLOWISE_DATA_PATH = path.resolve('/Users/TestUser/.flowise')
+            initializeTestConfig()
         })
 
         afterEach(() => {
-            Object.defineProperty(process, 'platform', { value: 'darwin', configurable: true })
-            jest.restoreAllMocks()
+            Object.defineProperty(process, 'platform', { value: originalPlatform, configurable: true })
         })
 
         it('should accept a valid path whose casing differs from the allowed directory', () => {
-            // allowedDir = /Users/TestUser/.flowise (mixed case from getUserHome mock)
-            // user input  = /users/testuser/.flowise/mydb.sqlite (all lowercase)
             const result = validateSQLitePath('/users/testuser/.flowise/mydb.sqlite')
-            expect(result).toBe('/users/testuser/.flowise/mydb.sqlite')
+            expect(result).toBe(path.resolve('/users/testuser/.flowise/mydb.sqlite'))
         })
 
         it('should still reject a path outside .flowise even after case normalisation', () => {
