@@ -165,6 +165,8 @@ Commercial license keys, organization invitations, SMTP-based account management
 
 Set `FLOWISE_DATA_PATH` to the mounted persistent-volume directory (for example, `/data`). If unset or empty, it defaults to `~/.flowise` under the runtime user's home directory. Configuration is resolved once after environment files and CLI overrides have loaded; restart server and worker processes to apply changes. Startup reports `Flowise data directory: <resolved path>` without printing the config object or secrets.
 
+When `FLOWISE_DATA_PATH` is explicitly set to a non-empty value, configuration initialization creates the directory if needed and checks actual access by listing its contents and writing, reading, and deleting a uniquely named temporary file. Startup stops with an error identifying the path and cause if any operation fails. Cleanup is attempted even after a failed write or read. This check applies only to the configured data root, without recursively checking its contents or checking individual path overrides. It is skipped when `FLOWISE_DATA_PATH` is unset or empty.
+
 | Setting or data            | Default location                                               |
 | -------------------------- | -------------------------------------------------------------- |
 | `DATABASE_PATH`            | Data root; contains `database.sqlite` and `model-catalog.json` |

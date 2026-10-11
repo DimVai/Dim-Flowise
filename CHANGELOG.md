@@ -8,6 +8,8 @@ This fork has its own version numbering, beginning with `1.0`; the current value
 
 ### Changed
 
+-   Check actual read/write access to an explicitly configured, non-empty `FLOWISE_DATA_PATH` during startup, creating the directory if needed and stopping with a descriptive error on failure. The default root and individual path overrides receive no additional checks. See [Persistence](CONFIGURATION.md#persistence).
+
 -   Correct the authentication duration variable name to `FLOWISE_JWT_DURATION` using ASCII Latin characters. Existing deployments must rename the previous misspelled environment variable; its value and the `24h` default are unchanged.
 
 -   Document the simplified PaaS setup using three authentication variables and one persistent-volume path, with guidance for retaining credential encryption keys across deployments and migrations.
@@ -29,6 +31,8 @@ This fork has its own version numbering, beginning with `1.0`; the current value
 -   Refresh the basic OpenAI, Anthropic, and Google Gemini chat lists from Models.dev once at server/worker startup, with per-provider fallback and `DISABLE_DYNAMIC_MODELS` opt-out. Filter unsuitable entries and order accepted models by release date without changing saved flows or the source catalog. See [Model catalog](CONFIGURATION.md#model-catalog).
 
 ### Fixed
+
+-   Include `build/**` alongside `dist/**` in Turborepo build outputs so cached UI builds restore their generated files, preventing missing `flowise-ui/build/index.html` errors after deployment.
 
 -   Supply the required cost field in the MetricsDisplay locale test fixture to fix the observe package TypeScript build error (TS2741).
 
