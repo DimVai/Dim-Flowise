@@ -1337,6 +1337,10 @@ export const showHideInputParams = (nodeData) => {
     return showHideInputs(nodeData, 'inputParams')
 }
 
+export const isInputParamHidden = (inputParam, componentNode) => {
+    return inputParam.hidden || componentNode?.inputs?.some((param) => param.name === inputParam.name && param.hidden)
+}
+
 export const showHideInputAnchors = (nodeData) => {
     return showHideInputs(nodeData, 'inputAnchors')
 }

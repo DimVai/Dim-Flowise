@@ -26,6 +26,10 @@ For new basic OpenAI, Anthropic, and Google Gemini chat model nodes, the default
 
 Catalog messages use the existing Flowise server/worker logger and its timestamp/level format, with the `[model-catalog]` prefix. Successful provider counts are combined into one `INFO` line; providers retaining their fallback lists are combined into one `WARN` line. The 10-second timeout limits request waiting; it does not delay the start of the refresh.
 
+## ChatOpenAI
+
+The standard `ChatOpenAI` node sends generation requests to the Responses API. If you configure a custom Base URL, it must support the `/responses` endpoint. The editor hides Stop Sequence, Frequency Penalty, and Presence Penalty because these settings have no effect on Responses requests.
+
 ## Authentication
 
 | Variable               | Required | Default | Meaning                                                                                                             |

@@ -14,6 +14,7 @@ import NodeInputHandler from './NodeInputHandler'
 import NodeOutputHandler from './NodeOutputHandler'
 import AdditionalParamsDialog from '@/ui-component/dialog/AdditionalParamsDialog'
 import NodeInfoDialog from '@/ui-component/dialog/NodeInfoDialog'
+import { isInputParamHidden } from '@/utils/genericHelper'
 
 // const
 import { baseURL } from '@/store/constant'
@@ -54,9 +55,10 @@ const CanvasNode = ({ data }) => {
     const nodeVersionEmptyMessage = (newVersion) => `Node outdated\nUpdate to latest version ${newVersion}`
 
     const onDialogClicked = () => {
+        const componentNode = canvas.componentNodes.find((node) => node.name === data.name)
         const dialogProps = {
             data,
-            inputParams: data.inputParams.filter((inputParam) => !inputParam.hidden).filter((param) => param.additionalParams),
+            inputParams: data.inputParams.filter((param) => param.additionalParams && !isInputParamHidden(param, componentNode)),
             confirmButtonName: 'Save',
             cancelButtonName: 'Cancel'
         }

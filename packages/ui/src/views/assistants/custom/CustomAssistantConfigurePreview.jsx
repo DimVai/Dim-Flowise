@@ -54,7 +54,7 @@ import { baseURL } from '@/store/constant'
 import { SET_CHATFLOW, closeSnackbar as closeSnackbarAction, enqueueSnackbar as enqueueSnackbarAction } from '@/store/actions'
 
 // Utils
-import { initNode, showHideInputParams } from '@/utils/genericHelper'
+import { initNode, isInputParamHidden, showHideInputParams } from '@/utils/genericHelper'
 import useNotifier from '@/utils/useNotifier'
 import { toolAgentFlow } from './toolAgentFlow'
 
@@ -165,12 +165,16 @@ const CustomAssistantConfigurePreview = () => {
         })
     }
 
+    const getVisibleChatModelParams = () => {
+        const componentNode = chatModelsComponents.find((model) => model.name === selectedChatModel.name)
+        return showHideInputParams(selectedChatModel).filter(
+            (inputParam) => !isInputParamHidden(inputParam, componentNode) && inputParam.display !== false
+        )
+    }
+
     const checkInputParamsMandatory = () => {
         let canSubmit = true
-        const visibleInputParams = showHideInputParams(selectedChatModel).filter(
-            (inputParam) => !inputParam.hidden && inputParam.display !== false
-        )
-        for (const inputParam of visibleInputParams) {
+        for (const inputParam of getVisibleChatModelParams()) {
             if (!inputParam.optional && (!selectedChatModel.inputs[inputParam.name] || !selectedChatModel.credential)) {
                 if (inputParam.type === 'credential' && !selectedChatModel.credential) {
                     canSubmit = false
@@ -1167,16 +1171,14 @@ const CustomAssistantConfigurePreview = () => {
                                                     borderRadius: 2
                                                 }}
                                             >
-                                                {showHideInputParams(selectedChatModel)
-                                                    .filter((inputParam) => !inputParam.hidden && inputParam.display !== false)
-                                                    .map((inputParam, index) => (
-                                                        <DocStoreInputHandler
-                                                            key={index}
-                                                            inputParam={inputParam}
-                                                            data={selectedChatModel}
-                                                            onNodeDataChange={handleChatModelDataChange}
-                                                        />
-                                                    ))}
+                                                {getVisibleChatModelParams().map((inputParam, index) => (
+                                                    <DocStoreInputHandler
+                                                        key={index}
+                                                        inputParam={inputParam}
+                                                        data={selectedChatModel}
+                                                        onNodeDataChange={handleChatModelDataChange}
+                                                    />
+                                                ))}
                                             </Box>
                                         )}
                                         <Box

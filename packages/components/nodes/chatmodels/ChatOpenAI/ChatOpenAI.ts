@@ -156,6 +156,7 @@ class ChatOpenAI_ChatModels implements INode {
                 name: 'frequencyPenalty',
                 type: 'number',
                 step: 0.1,
+                hidden: true,
                 optional: true,
                 additionalParams: true
             },
@@ -164,6 +165,7 @@ class ChatOpenAI_ChatModels implements INode {
                 name: 'presencePenalty',
                 type: 'number',
                 step: 0.1,
+                hidden: true,
                 optional: true,
                 additionalParams: true
             },
@@ -189,6 +191,7 @@ class ChatOpenAI_ChatModels implements INode {
                 name: 'stopSequence',
                 type: 'string',
                 rows: 4,
+                hidden: true,
                 optional: true,
                 description: 'List of stop words to use when generating. Use comma to separate multiple stop words.',
                 additionalParams: true
@@ -300,7 +303,7 @@ class ChatOpenAI_ChatModels implements INode {
             }
         }
 
-        const model = new ChatOpenAI(nodeData.id, obj)
+        const model = new ChatOpenAI(nodeData.id, { ...obj, useResponsesApi: true })
         model.setMultiModalOption(multiModalOption)
 
         return model

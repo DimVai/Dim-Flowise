@@ -8,6 +8,8 @@ This fork has its own version numbering, beginning with `1.0`; the current value
 
 ### Changed
 
+-   Use the OpenAI Responses API for the standard `ChatOpenAI` node in Chatflows, Agentflows, and Custom Assistants. Hide Stop Sequence, Frequency Penalty, and Presence Penalty in its configuration UI. Custom base URLs must support `/responses`. See [ChatOpenAI](CONFIGURATION.md#chatopenai).
+
 -   Check actual read/write access to an explicitly configured, non-empty `FLOWISE_DATA_PATH` during startup, creating the directory if needed and stopping with a descriptive error on failure. The default root and individual path overrides receive no additional checks. See [Persistence](CONFIGURATION.md#persistence).
 
 -   Correct the authentication duration variable name to `FLOWISE_JWT_DURATION` using ASCII Latin characters. Existing deployments must rename the previous misspelled environment variable; its value and the `24h` default are unchanged.
