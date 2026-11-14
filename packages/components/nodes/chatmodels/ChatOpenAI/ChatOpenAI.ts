@@ -75,7 +75,7 @@ class ChatOpenAI_ChatModels implements INode {
             },
             {
                 label: 'Reasoning',
-                description: 'Whether the model supports reasoning. Only applicable for reasoning models (gpt-5 and o-series models only)',
+                description: 'Whether the model supports reasoning. Only applicable for reasoning models.',
                 name: 'reasoning',
                 type: 'boolean',
                 default: false,
@@ -84,7 +84,7 @@ class ChatOpenAI_ChatModels implements INode {
             },
             {
                 label: 'Reasoning Effort',
-                description: 'Constrains effort on reasoning. Only applicable for reasoning models (gpt-5 and o-series models only)',
+                description: 'Control how much effort the model spends on reasoning. Only applicable for reasoning models.',
                 name: 'reasoningEffort',
                 type: 'options',
                 options: [
@@ -103,7 +103,7 @@ class ChatOpenAI_ChatModels implements INode {
                     {
                         label: 'X-High',
                         name: 'xhigh',
-                        description: 'X-High is supported for all models after gpt-5.1-codex-max'
+                        description: 'Available on supported models.'
                     }
                 ],
                 additionalParams: true,

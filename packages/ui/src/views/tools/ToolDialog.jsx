@@ -484,16 +484,14 @@ const ToolDialog = ({ show, dialogProps, onUseTemplate, onCancel, onConfirm, set
                                 Tool description
                                 <span style={{ color: 'red' }}>&nbsp;*</span>
                             </Typography>
-                            <TooltipWithParser
-                                title={'Description of what the tool does. This is for ChatGPT to determine when to use this tool.'}
-                            />
+                            <TooltipWithParser title='Describe what the tool does and when the model should use it.' />
                         </Stack>
                         <OutlinedInput
                             id='toolDesc'
                             type='string'
                             fullWidth
                             disabled={dialogProps.type === 'TEMPLATE'}
-                            placeholder='Description of what the tool does. This is for ChatGPT to determine when to use this tool.'
+                            placeholder='Describe what the tool does and when the model should use it.'
                             multiline={true}
                             rows={3}
                             value={toolDesc}

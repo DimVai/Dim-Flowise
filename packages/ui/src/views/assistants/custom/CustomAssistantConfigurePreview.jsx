@@ -54,7 +54,7 @@ import { baseURL } from '@/store/constant'
 import { SET_CHATFLOW, closeSnackbar as closeSnackbarAction, enqueueSnackbar as enqueueSnackbarAction } from '@/store/actions'
 
 // Utils
-import { initNode, isInputParamHidden, showHideInputParams } from '@/utils/genericHelper'
+import { initNode, isInputParamHidden, refreshModelNodeInputMetadata, showHideInputParams } from '@/utils/genericHelper'
 import useNotifier from '@/utils/useNotifier'
 import { toolAgentFlow } from './toolAgentFlow'
 
@@ -167,7 +167,7 @@ const CustomAssistantConfigurePreview = () => {
 
     const getVisibleChatModelParams = () => {
         const componentNode = chatModelsComponents.find((model) => model.name === selectedChatModel.name)
-        return showHideInputParams(selectedChatModel).filter(
+        return showHideInputParams(refreshModelNodeInputMetadata(selectedChatModel, componentNode)).filter(
             (inputParam) => !isInputParamHidden(inputParam, componentNode) && inputParam.display !== false
         )
     }

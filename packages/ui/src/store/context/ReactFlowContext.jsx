@@ -1,7 +1,7 @@
 import { createContext, useState } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import PropTypes from 'prop-types'
-import { getUniqueNodeId, showHideInputParams } from '@/utils/genericHelper'
+import { getUniqueNodeId, refreshModelNodeInputMetadata, showHideInputParams } from '@/utils/genericHelper'
 import { cloneDeep, isEqual } from 'lodash'
 import { SET_DIRTY } from '@/store/actions'
 
@@ -18,6 +18,7 @@ export const flowContext = createContext(initialValue)
 
 export const ReactFlowContext = ({ children }) => {
     const dispatch = useDispatch()
+    const componentNodes = useSelector((state) => state.canvas.componentNodes)
     const [reactFlowInstance, setReactFlowInstance] = useState(null)
 
     const onAgentflowNodeStatusUpdate = ({ nodeId, status, error }) => {
@@ -55,10 +56,9 @@ export const ReactFlowContext = ({ children }) => {
 
                 updatedInputs[inputParam.name] = newValue
 
-                const updatedInputParams = showHideInputParams({
-                    ...node.data,
-                    inputs: updatedInputs
-                })
+                const updatedData = { ...node.data, inputs: updatedInputs }
+                const componentNode = componentNodes.find((component) => component.name === node.data.name)
+                const updatedInputParams = showHideInputParams(refreshModelNodeInputMetadata(updatedData, componentNode))
 
                 // Remove inputs with display set to false
                 Object.keys(updatedInputs).forEach((key) => {

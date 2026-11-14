@@ -1,5 +1,5 @@
 {
-    "description": "Basic example of Conversation Chain with built-in memory - works exactly like ChatGPT",
+    "description": "Basic conversation chain with built-in memory.",
     "usecases": ["Basic"],
     "framework": ["Langchain"],
     "nodes": [
@@ -111,7 +111,7 @@
                         "label": "Allow Image Uploads",
                         "name": "allowImageUploads",
                         "type": "boolean",
-                        "description": "Automatically uses gpt-4-vision-preview when image is being uploaded from chat. Only works with LLMChain, Conversation Chain, ReAct Agent, and Conversational Agent",
+                        "description": "Allow image input when the selected model and flow support it.",
                         "default": false,
                         "optional": true,
                         "id": "chatOpenAI_0-input-allowImageUploads-boolean"

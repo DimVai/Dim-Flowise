@@ -56,7 +56,6 @@ class GoogleGenerativeAI_ChatModels implements INode {
                 label: 'Custom Model Name',
                 name: 'customModelName',
                 type: 'string',
-                placeholder: 'gemini-1.5-pro-exp-0801',
                 description: 'Custom model name to use. If provided, it will override the model selected',
                 additionalParams: true,
                 optional: true
@@ -86,25 +85,17 @@ class GoogleGenerativeAI_ChatModels implements INode {
                 default: false,
                 optional: true
             },
-            /** The thinkingLevel parameter, recommended for Gemini 3 models and onwards. */
-            {
-                label: 'Thinking Budget',
-                name: 'thinkingBudget',
-                type: 'number',
-                description: 'Guides the number of thinking tokens. -1 for dynamic, 0 to disable, or positive integer (Gemini 2.5 models).',
-                step: 1,
-                optional: true,
-                additionalParams: true,
-                show: {
-                    modelName: ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.5-flash-lite']
-                }
-            },
             {
                 label: 'Thinking Level',
                 name: 'thinkingLevel',
                 type: 'options',
-                description: 'Adjust the amount of reasoning effort based on the complexity of the user request',
+                description: 'Control how much the model reasons before responding. Leave blank to use the model default.',
                 options: [
+                    {
+                        label: 'Minimal',
+                        name: 'MINIMAL',
+                        description: 'Available on supported models.'
+                    },
                     {
                         label: 'Low',
                         name: 'LOW'
@@ -116,13 +107,15 @@ class GoogleGenerativeAI_ChatModels implements INode {
                     {
                         label: 'High',
                         name: 'HIGH'
+                    },
+                    {
+                        label: 'X-High',
+                        name: 'XHIGH',
+                        description: 'Available on supported models.'
                     }
                 ],
                 optional: true,
-                additionalParams: true,
-                show: {
-                    modelName: ['gemini-3.1-pro-preview', 'gemini-3.1-flash-lite-preview', 'gemini-3-flash-preview']
-                }
+                additionalParams: true
             },
             {
                 label: 'Max Output Tokens',
@@ -257,20 +250,22 @@ class GoogleGenerativeAI_ChatModels implements INode {
         const cache = nodeData.inputs?.cache as BaseCache
         const streaming = nodeData.inputs?.streaming as boolean
         const baseUrl = nodeData.inputs?.baseUrl as string | undefined
-        const thinkingBudget = nodeData.inputs?.thinkingBudget as string
-        const thinkingLevel = nodeData.inputs?.thinkingLevel as 'LOW' | 'MEDIUM' | 'HIGH'
+        const thinkingBudget = nodeData.inputs?.thinkingBudget as string | number | undefined
+        // LangChain forwards these values, including newer levels missing from its current type.
+        const thinkingLevel = nodeData.inputs?.thinkingLevel as NonNullable<GoogleGenerativeAIChatInput['thinkingConfig']>['thinkingLevel']
+        const effectiveModelName = customModelName || modelName
 
         const allowImageUploads = nodeData.inputs?.allowImageUploads as boolean
 
         const obj: GoogleGenerativeAIChatInput = {
             apiKey: apiKey,
-            model: customModelName || modelName,
+            model: effectiveModelName,
             streaming: streaming ?? true
         }
 
         // this extra metadata is needed, as langchain does not show the model name in the callbacks.
         obj.metadata = {
-            fw_model_name: customModelName || modelName
+            fw_model_name: effectiveModelName
         }
         if (maxOutputTokens) obj.maxOutputTokens = parseInt(maxOutputTokens, 10)
         if (topP) obj.topP = parseFloat(topP)
@@ -286,9 +281,9 @@ class GoogleGenerativeAI_ChatModels implements INode {
                 thinkingLevel: thinkingLevel,
                 includeThoughts: true
             }
-        } else if (thinkingBudget) {
+        } else if (/^(?:models\/)?gemini-2\.5-/.test(effectiveModelName) && thinkingBudget != null && thinkingBudget !== '') {
             obj.thinkingConfig = {
-                thinkingBudget: parseInt(thinkingBudget, 10),
+                thinkingBudget: Number(thinkingBudget),
                 includeThoughts: true
             }
         }

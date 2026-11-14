@@ -43,7 +43,7 @@ class ChatOpenAICustom_ChatModels implements INode {
                 label: 'Model Name',
                 name: 'modelName',
                 type: 'string',
-                placeholder: 'ft:gpt-3.5-turbo:my-org:custom_suffix:id'
+                placeholder: 'ft:gpt-model-x:my-org:custom_suffix:id'
             },
             {
                 label: 'Temperature',

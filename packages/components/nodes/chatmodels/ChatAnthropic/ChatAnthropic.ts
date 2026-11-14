@@ -6,7 +6,7 @@ import { getBaseClasses, getCredentialData, getCredentialParam } from '../../../
 import { ChatAnthropic } from './FlowiseChatAnthropic'
 import { getModels, MODEL_TYPE } from '../../../src/modelLoader'
 import { getDefaultModelFor } from '../../../src/defaultChatModel'
-import { supportsSamplingParams } from '../../../src/anthropicUtils'
+import { DEFAULT_ADAPTIVE_THINKING_MODEL, supportsSamplingParams } from '../../../src/anthropicUtils'
 
 class ChatAnthropic_ChatModels implements INode {
     label: string
@@ -74,50 +74,9 @@ class ChatAnthropic_ChatModels implements INode {
                 default: false,
                 optional: true
             },
-            /*  The manual thinking: {type: "enabled", budget_tokens: N} configuration is deprecated on Opus 4.6 and will be removed in a future model release */
-            {
-                label: 'Extended Thinking',
-                name: 'extendedThinking',
-                type: 'boolean',
-                description: 'Enable extended thinking for reasoning model such as Claude Sonnet 3.7 and Claude 4',
-                optional: true,
-                additionalParams: true,
-                hide: {
-                    modelName: ['claude-opus-4-7', 'claude-opus-4-6', 'claude-sonnet-4-6']
-                }
-            },
-            {
-                label: 'Budget Tokens',
-                name: 'budgetTokens',
-                type: 'number',
-                step: 1,
-                default: '1024',
-                description: 'Maximum number of tokens Claude is allowed use for its internal reasoning process',
-                optional: true,
-                additionalParams: true,
-                show: {
-                    extendedThinking: true
-                },
-                hide: {
-                    modelName: ['claude-opus-4-7', 'claude-opus-4-6', 'claude-sonnet-4-6']
-                }
-            },
-            {
-                label: 'Adaptive Thinking',
-                description:
-                    'Claude evaluates the complexity of each request and determines whether and how much to use extended thinking.',
-                name: 'adaptiveThinking',
-                type: 'boolean',
-                default: false,
-                optional: true,
-                additionalParams: true,
-                show: {
-                    modelName: ['claude-opus-4-7', 'claude-opus-4-6', 'claude-sonnet-4-6']
-                }
-            },
             {
                 label: 'Thinking Effort',
-                description: 'Control how eager Claude is about spending tokens when responding to requests',
+                description: 'Control how much effort the model spends on a response. Leave blank to use the model default.',
                 name: 'thinkingEffort',
                 type: 'options',
                 optional: true,
@@ -135,15 +94,19 @@ class ChatAnthropic_ChatModels implements INode {
                         name: 'high'
                     },
                     {
+                        label: 'X-High',
+                        name: 'xhigh',
+                        description: 'Available on supported models.'
+                    },
+                    {
                         label: 'Max',
                         name: 'max',
-                        description: 'Absolute maximum capability with no constraints on token spending. Opus 4.6 and newer only'
+                        description: 'Use the highest effort. Available on supported models.'
                     }
                 ],
                 additionalParams: true,
                 show: {
-                    adaptiveThinking: true,
-                    modelName: ['claude-opus-4-7', 'claude-opus-4-6', 'claude-sonnet-4-6']
+                    modelName: DEFAULT_ADAPTIVE_THINKING_MODEL.source
                 }
             },
             {
@@ -191,15 +154,18 @@ class ChatAnthropic_ChatModels implements INode {
         const extendedThinking = nodeData.inputs?.extendedThinking as boolean
         const budgetTokens = nodeData.inputs?.budgetTokens as string
         const adaptiveThinking = nodeData.inputs?.adaptiveThinking as boolean
-        const thinkingEffort = nodeData.inputs?.thinkingEffort as 'low' | 'medium' | 'high' | 'max'
+        // The SDK forwards effort verbatim, but its current type omits xhigh.
+        const thinkingEffort = nodeData.inputs?.thinkingEffort as NonNullable<AnthropicInput['outputConfig']>['effort']
 
         const credentialData = await getCredentialData(nodeData.credential ?? '', options)
         const anthropicApiKey = getCredentialParam('anthropicApiKey', credentialData, nodeData)
 
         const allowImageUploads = nodeData.inputs?.allowImageUploads as boolean
 
-        const samplingSupported = supportsSamplingParams(modelName)
-        const thinkingEnabled = adaptiveThinking || extendedThinking
+        const adaptiveByDefault = DEFAULT_ADAPTIVE_THINKING_MODEL.test(modelName)
+        const samplingSupported = !adaptiveByDefault && supportsSamplingParams(modelName)
+        const useAdaptiveThinking = adaptiveByDefault || adaptiveThinking
+        const thinkingEnabled = useAdaptiveThinking || extendedThinking
 
         const obj: Partial<AnthropicInput> & BaseLLMParams & { anthropicApiKey?: string } = {
             modelName,
@@ -218,7 +184,8 @@ class ChatAnthropic_ChatModels implements INode {
         if (samplingSupported && topK) obj.topK = parseFloat(topK)
         if (cache) obj.cache = cache
 
-        if (adaptiveThinking) {
+        // LangChain otherwise sends { type: 'disabled' }, which some current models reject.
+        if (useAdaptiveThinking) {
             obj.thinking = {
                 type: 'adaptive'
             }

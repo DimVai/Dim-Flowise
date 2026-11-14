@@ -343,7 +343,7 @@
                     },
                     {
                         "label": "Reasoning Effort",
-                        "description": "Constrains effort on reasoning for reasoning models. Only applicable for o1 and o3 models.",
+                        "description": "Control how much effort the model spends on reasoning. Only applicable for reasoning models.",
                         "name": "reasoningEffort",
                         "type": "options",
                         "options": [

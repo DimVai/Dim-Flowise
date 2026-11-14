@@ -52,7 +52,7 @@
                         "label": "Tool Calling Chat Model",
                         "name": "model",
                         "type": "BaseChatModel",
-                        "description": "Only compatible with models that are capable of function calling: ChatOpenAI, ChatMistral, ChatAnthropic, ChatGoogleGenerativeAI, GroqChat. Best result with GPT-4 model",
+                        "description": "Use a chat model that supports function calling.",
                         "id": "supervisor_0-input-model-BaseChatModel"
                     },
                     {
@@ -403,7 +403,7 @@
                         "label": "Allow Image Uploads",
                         "name": "allowImageUploads",
                         "type": "boolean",
-                        "description": "Automatically uses gpt-4-vision-preview when image is being uploaded from chat. Only works with LLMChain, Conversation Chain, ReAct Agent, and Conversational Agent",
+                        "description": "Allow image input when the selected model and flow support it.",
                         "default": false,
                         "optional": true,
                         "id": "chatOpenAI_0-input-allowImageUploads-boolean"

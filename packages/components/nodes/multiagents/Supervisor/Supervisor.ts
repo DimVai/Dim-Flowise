@@ -67,7 +67,7 @@ class Supervisor_MultiAgents implements INode {
                 label: 'Tool Calling Chat Model',
                 name: 'model',
                 type: 'BaseChatModel',
-                description: `Only compatible with models that are capable of function calling: ChatOpenAI, ChatMistral, ChatAnthropic, ChatGoogleGenerativeAI, GroqChat. Best result with GPT-4 model`
+                description: 'Use a chat model that supports function calling.'
             },
             {
                 label: 'Agent Memory',

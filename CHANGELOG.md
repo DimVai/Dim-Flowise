@@ -8,6 +8,8 @@ This fork has its own version numbering, beginning with `1.0`; the current value
 
 ### Changed
 
+-   Offer Thinking Level for Gemini and Thinking Effort for current Claude models. Retain saved legacy thinking settings for compatible models and remove model examples from tooltips, placeholders, and bundled templates.
+
 -   Use the OpenAI Responses API for the standard `ChatOpenAI` node in Chatflows, Agentflows, and Custom Assistants. Hide Stop Sequence, Frequency Penalty, and Presence Penalty in its configuration UI. Custom base URLs must support `/responses`. See [ChatOpenAI](CONFIGURATION.md#chatopenai).
 
 -   Check actual read/write access to an explicitly configured, non-empty `FLOWISE_DATA_PATH` during startup, creating the directory if needed and stopping with a descriptive error on failure. The default root and individual path overrides receive no additional checks. See [Persistence](CONFIGURATION.md#persistence).
@@ -33,6 +35,8 @@ This fork has its own version numbering, beginning with `1.0`; the current value
 -   Refresh the basic OpenAI, Anthropic, and Google Gemini chat lists from Models.dev once at server/worker startup, with per-provider fallback and `DISABLE_DYNAMIC_MODELS` opt-out. Filter unsuitable entries and order accepted models by release date without changing saved flows or the source catalog. See [Model catalog](CONFIGURATION.md#model-catalog).
 
 ### Fixed
+
+-   Use adaptive thinking for current Claude models and omit sampling parameters that their API rejects, including the editor's previous temperature default.
 
 -   Include `build/**` alongside `dist/**` in Turborepo build outputs so cached UI builds restore their generated files, preventing missing `flowise-ui/build/index.html` errors after deployment.
 

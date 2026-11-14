@@ -11,19 +11,12 @@
  * portion of the name so they work across all of the above.
  */
 
-/**
- * Model name patterns that do not accept sampling parameters
- * (`temperature`, `top_p`, `top_k`). Anthropic dropped support for these on
- * newer reasoning-first models, starting with Claude Opus 4.7. The patterns
- * cover Opus 4.7+ and any future Opus major versions (5.x, 6.x, ...).
- * Extend this list when new model families adopt the same restriction.
- */
-export const MODELS_WITHOUT_SAMPLING_PARAMS: RegExp[] = [
-    // Opus 4.7, 4.8, 4.9
-    /opus-4-[7-9](?:\b|-)/,
-    // Opus 5.x and beyond (single- or multi-digit major versions >= 5)
-    /opus-(?:[5-9]|\d{2,})-/
-]
+// Claude 5 and later, plus Mythos Preview, use adaptive thinking by default.
+// Match the version inside provider-prefixed or dated IDs as well.
+export const DEFAULT_ADAPTIVE_THINKING_MODEL = /\bclaude-(?:(?:opus|sonnet|haiku|fable|mythos)-(?:[5-9]|\d{2,})\b|mythos-preview\b)/
+
+/** Model name patterns that do not accept custom temperature, top_p or top_k. */
+export const MODELS_WITHOUT_SAMPLING_PARAMS: RegExp[] = [/opus-4-[7-9](?:\b|-)/, /opus-(?:[5-9]|\d{2,})-/]
 
 /**
  * Returns false when the given model name matches any pattern in

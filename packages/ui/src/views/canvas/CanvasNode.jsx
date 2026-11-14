@@ -14,7 +14,7 @@ import NodeInputHandler from './NodeInputHandler'
 import NodeOutputHandler from './NodeOutputHandler'
 import AdditionalParamsDialog from '@/ui-component/dialog/AdditionalParamsDialog'
 import NodeInfoDialog from '@/ui-component/dialog/NodeInfoDialog'
-import { isInputParamHidden } from '@/utils/genericHelper'
+import { isInputParamHidden, refreshModelNodeInputMetadata } from '@/utils/genericHelper'
 
 // const
 import { baseURL } from '@/store/constant'
@@ -24,13 +24,14 @@ import LlamaindexPNG from '@/assets/images/llamaindex.png'
 
 // ===========================|| CANVAS NODE ||=========================== //
 
-const CanvasNode = ({ data }) => {
+const CanvasNode = ({ data: savedData }) => {
     const theme = useTheme()
     const canvas = useSelector((state) => state.canvas)
     const { deleteNode, duplicateNode } = useContext(flowContext)
+    const componentNode = canvas.componentNodes.find((node) => node.name === savedData.name)
+    const data = refreshModelNodeInputMetadata(savedData, componentNode)
 
     const [showDialog, setShowDialog] = useState(false)
-    const [dialogProps, setDialogProps] = useState({})
     const [showInfoDialog, setShowInfoDialog] = useState(false)
     const [infoDialogProps, setInfoDialogProps] = useState({})
     const [warningMessage, setWarningMessage] = useState('')
@@ -53,18 +54,6 @@ const CanvasNode = ({ data }) => {
     const nodeOutdatedMessage = (oldVersion, newVersion) => `Node version ${oldVersion} outdated\nUpdate to latest version ${newVersion}`
 
     const nodeVersionEmptyMessage = (newVersion) => `Node outdated\nUpdate to latest version ${newVersion}`
-
-    const onDialogClicked = () => {
-        const componentNode = canvas.componentNodes.find((node) => node.name === data.name)
-        const dialogProps = {
-            data,
-            inputParams: data.inputParams.filter((param) => param.additionalParams && !isInputParamHidden(param, componentNode)),
-            confirmButtonName: 'Save',
-            cancelButtonName: 'Cancel'
-        }
-        setDialogProps(dialogProps)
-        setShowDialog(true)
-    }
 
     const getBorderColor = () => {
         if (data.selected) return theme.palette.primary.main
@@ -256,7 +245,11 @@ const CanvasNode = ({ data }) => {
                                             : 0
                                 }}
                             >
-                                <Button sx={{ borderRadius: 25, width: '90%', mb: 2 }} variant='outlined' onClick={onDialogClicked}>
+                                <Button
+                                    sx={{ borderRadius: 25, width: '90%', mb: 2 }}
+                                    variant='outlined'
+                                    onClick={() => setShowDialog(true)}
+                                >
                                     Additional Parameters
                                 </Button>
                             </div>
@@ -284,7 +277,10 @@ const CanvasNode = ({ data }) => {
             </NodeCardWrapper>
             <AdditionalParamsDialog
                 show={showDialog}
-                dialogProps={dialogProps}
+                dialogProps={{
+                    data,
+                    inputParams: data.inputParams.filter((param) => param.additionalParams && !isInputParamHidden(param, componentNode))
+                }}
                 onCancel={() => setShowDialog(false)}
             ></AdditionalParamsDialog>
             <NodeInfoDialog show={showInfoDialog} dialogProps={infoDialogProps} onCancel={() => setShowInfoDialog(false)}></NodeInfoDialog>

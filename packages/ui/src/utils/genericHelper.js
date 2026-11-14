@@ -1,4 +1,4 @@
-import { uniq, get, isEqual } from 'lodash'
+import { cloneDeep, uniq, get, isEqual } from 'lodash'
 import moment from 'moment'
 
 export const getUniqueNodeId = (nodeData, nodes) => {
@@ -1335,6 +1335,38 @@ export const showHideInputs = (nodeData, inputType, overrideParams, arrayIndex) 
 
 export const showHideInputParams = (nodeData) => {
     return showHideInputs(nodeData, 'inputParams')
+}
+
+const chatModelsWithCurrentParams = new Set(['chatOpenAI', 'chatOpenAICustom', 'chatGoogleGenerativeAI', 'chatAnthropic'])
+const nodesWithCurrentAnchorDescriptions = new Set(['conversationChain', 'supervisor'])
+
+// These editors can use the installed definitions while retaining the saved inputs and connection handles.
+export const refreshModelNodeInputMetadata = (nodeData, componentNode) => {
+    if (!componentNode?.inputs) return nodeData
+
+    if (nodeData.name === 'xmlAgent') {
+        return { ...nodeData, description: componentNode.description }
+    }
+
+    if (chatModelsWithCurrentParams.has(nodeData.name)) {
+        const { inputParams } = initNode(cloneDeep(componentNode), nodeData.id)
+        const storedParams = nodeData.inputParams ?? []
+        const updatedParams = inputParams.map((param) => {
+            const storedParam = storedParams.find((saved) => saved.name === param.name && saved.type === param.type)
+            return storedParam?.id ? { ...param, id: storedParam.id } : param
+        })
+        return { ...nodeData, inputParams: showHideInputParams({ ...nodeData, inputParams: updatedParams }) }
+    }
+
+    if (nodesWithCurrentAnchorDescriptions.has(nodeData.name) && nodeData.inputAnchors) {
+        const inputAnchors = nodeData.inputAnchors.map((anchor) => {
+            const current = componentNode.inputs.find((param) => param.name === anchor.name)
+            return current ? { ...anchor, description: current.description } : anchor
+        })
+        return { ...nodeData, inputAnchors }
+    }
+
+    return nodeData
 }
 
 export const isInputParamHidden = (inputParam, componentNode) => {

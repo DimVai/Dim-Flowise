@@ -30,6 +30,12 @@ Catalog messages use the existing Flowise server/worker logger and its timestamp
 
 The standard `ChatOpenAI` node sends generation requests to the Responses API. If you configure a custom Base URL, it must support the `/responses` endpoint. The editor hides Stop Sequence, Frequency Penalty, and Presence Penalty because these settings have no effect on Responses requests.
 
+## Thinking settings
+
+The standard **Google Gemini** node offers an optional **Thinking Level** for current models. Leave it blank to use the model's default. The set of supported levels varies by model. The node still applies a saved thinking budget with compatible older models when no level is set.
+
+The standard **Anthropic Claude** node uses adaptive thinking for current models. **Thinking Effort** is optional, and an empty value uses the model's default effort. These models do not accept custom sampling settings, so the node omits Temperature, Top P, and Top K from their requests. Existing thinking settings for older Claude models still apply to saved configurations that use them.
+
 ## Authentication
 
 | Variable               | Required | Default | Meaning                                                                                                             |

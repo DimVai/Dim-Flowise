@@ -75,7 +75,7 @@ class ConversationChain_Chains implements INode {
                 name: 'document',
                 type: 'Document',
                 description:
-                    'Include whole document into the context window, if you get maximum context length error, please use model with higher context window like Claude 100k, or gpt4 32k',
+                    'Include the whole document in the context window. Use a model with a larger context window if the document exceeds the limit.',
                 optional: true,
                 list: true
             },*/
