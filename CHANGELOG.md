@@ -8,6 +8,8 @@ This fork has its own version numbering, beginning with `1.0`; the current value
 
 ### Changed
 
+-   Add a [Custom Tool and Custom Function dependency reference](packages/components/TOOL_DEPENDENCIES.md) covering the sandbox defaults and settings for additional packages and modules.
+
 -   Offer Thinking Level for Gemini and Thinking Effort for current Claude models. Retain saved legacy thinking settings for compatible models and remove model examples from tooltips, placeholders, and bundled templates.
 
 -   Use the OpenAI Responses API for the standard `ChatOpenAI` node in Chatflows, Agentflows, and Custom Assistants. Hide Stop Sequence, Frequency Penalty, and Presence Penalty in its configuration UI. Custom base URLs must support `/responses`. See [ChatOpenAI](CONFIGURATION.md#chatopenai).

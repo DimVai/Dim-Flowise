@@ -137,6 +137,7 @@ For manual verification, `pnpm test` runs the workspace test tasks. Package guid
 ## Configuration and documentation
 
 -   [Configuration](CONFIGURATION.md): environment variables, authentication, proxy trust, and persistence.
+-   [Custom Tool and Custom Function dependencies](packages/components/TOOL_DEPENDENCIES.md): package availability and how to allow additional modules.
 -   [Changelog](CHANGELOG.md): changes introduced by this fork.
 -   [Security note](SECURITY.md): maintenance scope and reporting policy.
 -   [Contribution policy](CONTRIBUTING.md): external contributions are not currently accepted.

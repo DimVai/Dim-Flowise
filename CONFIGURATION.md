@@ -163,6 +163,8 @@ The following reference preserves the general configuration options previously d
 | SHOW_COMMUNITY_NODES                 | Show nodes created by community                                                                                                                                                                                                                       | Boolean                                               |                               |
 | DISABLED_NODES                       | Hide nodes from UI (comma separated list of node names)                                                                                                                                                                                               | String                                                |                               |
 
+See [Custom Tool and Custom Function dependencies](packages/components/TOOL_DEPENDENCIES.md) for the package lists and examples for `TOOL_FUNCTION_BUILTIN_DEP`, `TOOL_FUNCTION_EXTERNAL_DEP`, `ALLOW_BUILTIN_DEP`.
+
 Additional database setting: `DATABASE_REJECT_UNAUTHORIZED=true` enables certificate verification when `DATABASE_SSL_KEY_BASE64` is used; the implementation checks explicitly for the string `true`.
 
 `APP_URL` is the application base URL used by server-side features such as scheduled executions, and its origin participates in the login endpoint's CORS allowlist. `CORS_ORIGINS` accepts an explicit comma-separated origin list. When cross-origin cookies are needed, also set `CORS_ALLOW_CREDENTIALS=true`; a wildcard origin does not enable credentialed requests. The login cookie remains `SameSite=Lax`, so using unrelated sites for the UI and API is not the standard supported setup.
