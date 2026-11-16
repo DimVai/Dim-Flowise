@@ -2,6 +2,10 @@
 
 This reference covers JavaScript running in the local NodeVM sandbox. An npm package must be installed where Flowise runs and allowed by the sandbox before a script can load it with `require()`.
 
+## Use fetch without an import
+
+Call `await fetch(url, options)` directly from a Custom Tool or Custom Function. The global function uses the existing `node-fetch` wrapper and the same HTTP policy for the initial URL and every redirect. It accepts a URL string and the wrapper's request options. Scripts that already use `require('node-fetch')` can continue to do so.
+
 ## Available packages and modules
 
 | What you want to load                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | How to enable it                                                                                                                                      |

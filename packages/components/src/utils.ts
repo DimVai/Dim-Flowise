@@ -1724,7 +1724,6 @@ export const executeJavaScriptCode = async (
 
         const defaultNodeVMOptions: any = {
             console: 'inherit',
-            sandbox,
             require: {
                 external: {
                     modules: deps,
@@ -1743,6 +1742,7 @@ export const executeJavaScriptCode = async (
         const finalNodeVMOptions = {
             ...defaultNodeVMOptions,
             ...nodeVMOptions,
+            sandbox: { ...(nodeVMOptions.sandbox ?? sandbox), fetch: secureNodeFetch },
             require: defaultNodeVMOptions.require,
             eval: false,
             wasm: false,

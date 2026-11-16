@@ -8,6 +8,8 @@ This fork has its own version numbering, beginning with `1.0`; the current value
 
 ### Changed
 
+-   Expose global `fetch(url, options)` in the local Custom Tool and Custom Function sandbox. It uses the same HTTP security checks as `require('node-fetch')`.
+
 -   Add a [Custom Tool and Custom Function dependency reference](packages/components/TOOL_DEPENDENCIES.md) covering the sandbox defaults and settings for additional packages and modules.
 
 -   Offer Thinking Level for Gemini and Thinking Effort for current Claude models. Retain saved legacy thinking settings for compatible models and remove model examples from tooltips, placeholders, and bundled templates.
