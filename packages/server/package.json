@@ -1,7 +1,7 @@
 {
     "name": "flowise",
     "version": "3.1.4",
-    "forkVersion": "1.7",
+    "forkVersion": "1.7.2",
     "description": "Flowiseai Server",
     "main": "dist/index",
     "types": "dist/index.d.ts",

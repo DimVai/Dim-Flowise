@@ -40,6 +40,7 @@ These changes arose from implementing the major differences above and supporting
 | Independent API-key permission enforcement | A community implementation replaces the removed commercial permission checks, preserving per-key restrictions on management API requests. See [API keys and permissions](CONFIGURATION.md#api-keys-and-permissions) for details, including keys used only to protect flow execution.                                                                                                                                                                                             |
 | OpenAI Responses API                       | The standard `ChatOpenAI` node uses the Responses API in Chatflows, Agentflows, and Custom Assistants. See [ChatOpenAI configuration](CONFIGURATION.md#chatopenai) for endpoint and parameter compatibility.                                                                                                                                                                                                                                                                     |
 | Gemini and Claude thinking controls        | Gemini and Claude editors expose the current thinking controls without depending on a list of individual model IDs. See [Thinking settings](CONFIGURATION.md#thinking-settings).                                                                                                                                                                                                                                                                                                 |
+| Bundled website chatbot embed              | The installation serves a versioned copy of Flowise Chat Embed for use as a CDN fallback. See [Website chatbot embed](#website-chatbot-embed).                                                                                                                                                                                                                                                                                                                                   |
 
 ### Bug fixes
 
@@ -144,6 +145,16 @@ For manual verification, `pnpm test` runs the workspace test tasks. Package guid
 -   [Contribution policy](CONTRIBUTING.md): external contributions are not currently accepted.
 
 The [upstream Flowise documentation](https://docs.flowiseai.com/) remains a useful reference for shared community features and integrations. Authentication, commercial features, installation, and deployment can differ; follow this repository's instructions for those areas. Public documentation for this fork is maintained in English.
+
+## Website chatbot embed
+
+CDN fallback for `flowise-embed@3.1.6` using your Dim-Flowise host.
+
+```js
+import Chatbot from 'https://your-dim-flowise-host.example/embed/3.1.6/web.js'
+```
+
+The import works from any origin without configuring `CORS_ORIGINS`. [API CORS settings](CONFIGURATION.md#general-server-variables) · [MIT license](packages/ui/public/embed/3.1.6/LICENSE.txt)
 
 ## Deployment on PaaS platforms (Railway.com, Render.com, etc.)
 

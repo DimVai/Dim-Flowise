@@ -273,6 +273,16 @@ export class App {
         const uiBuildPath = path.join(packagePath, 'build')
         const uiHtmlPath = path.join(packagePath, 'build', 'index.html')
 
+        this.app.use(
+            '/embed',
+            express.static(path.join(uiBuildPath, 'embed'), {
+                redirect: false,
+                setHeaders: (res) => {
+                    res.setHeader('Access-Control-Allow-Origin', '*')
+                    res.removeHeader('Access-Control-Allow-Credentials')
+                }
+            })
+        )
         this.app.use('/', express.static(uiBuildPath))
 
         // All other requests not handled will return React app

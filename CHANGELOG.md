@@ -62,6 +62,8 @@ This fork has its own version numbering, beginning with `1.0`; the current value
 
 ### Added
 
+-   Bundle Flowise Chat Embed `3.1.6` at `/embed/3.1.6/web.js` as a CDN fallback. Public static files under `/embed/` allow cross-origin reads without credentials. See [Website chatbot embed](README.md#website-chatbot-embed).
+
 -   Link to the Dim-Flowise GitHub repository from the About dialog's Latest Version column.
 
 -   Display the Dim-Flowise version below the installed Flowise version in About, sourced from `forkVersion` in `packages/server/package.json` (initial value `1.2`). Installed versions remain available if the upstream release lookup fails.

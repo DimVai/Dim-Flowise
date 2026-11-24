@@ -39,7 +39,7 @@
         "changeset:version": "changeset version"
     },
     "lint-staged": {
-        "*.{js,jsx,ts,tsx,json,md}": "eslint --fix"
+        "*.{js,jsx,ts,tsx,json}": "eslint --fix"
     },
     "devDependencies": {
         "@changesets/cli": "^2.27.0",

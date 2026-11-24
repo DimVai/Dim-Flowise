@@ -169,6 +169,8 @@ Additional database setting: `DATABASE_REJECT_UNAUTHORIZED=true` enables certifi
 
 `APP_URL` is the application base URL used by server-side features such as scheduled executions, and its origin participates in the login endpoint's CORS allowlist. `CORS_ORIGINS` accepts an explicit comma-separated origin list. When cross-origin cookies are needed, also set `CORS_ALLOW_CREDENTIALS=true`; a wildcard origin does not enable credentialed requests. The login cookie remains `SameSite=Lax`, so using unrelated sites for the UI and API is not the standard supported setup.
 
+Public static files under `/embed/`, including the [bundled chatbot module](README.md#website-chatbot-embed), allow cross-origin reads from any origin without credentials. Chatflow API requests still follow `CORS_ORIGINS` and the applicable chatflow **Allowed Domains** setting.
+
 The [server example](packages/server/.env.example) also lists advanced settings for secret-key storage, queue workers and Redis, metrics, telemetry, MCP restrictions, document loaders, and schedules. These inherited settings are not all required for a normal local installation. The [upstream documentation](https://docs.flowiseai.com/) can supplement shared feature settings, but this fork's authentication and deployment instructions take precedence.
 
 Commercial license keys, organization invitations, SMTP-based account management, and the old JWT/session settings do not configure this fork's authentication.
